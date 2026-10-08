@@ -1,0 +1,36 @@
+{
+  "schema": "nusa.pascal.job.v1",
+  "job_id": "local-generated-uuid",
+  "action": "CREATE_SCENE",
+  "tenant_id": "supplied-at-runtime",
+  "project_id": "supplied-at-runtime",
+  "model_code": "YAYASAN-NGAWI-ARCH-01",
+  "engine": {
+    "name": "pascal",
+    "version": "runtime-detected"
+  },
+  "units": "m",
+  "approval": {
+    "required": false,
+    "state": "draft"
+  },
+  "scene": {
+    "site": {
+      "width": 26,
+      "depth": 8,
+      "orientation_deg": 0
+    },
+    "levels": [
+      {"name":"L1","elevation":0},
+      {"name":"L2","elevation":3.6}
+    ],
+    "program": [
+      {"type":"floor","level":"L1","width":26,"depth":8},
+      {"type":"floor","level":"L2","width":26,"depth":8}
+    ]
+  },
+  "evidence": {
+    "source": "nusa-pilot-yayasan-ngawi",
+    "note": "Preliminary spatial model. Not for construction."
+  }
+}
