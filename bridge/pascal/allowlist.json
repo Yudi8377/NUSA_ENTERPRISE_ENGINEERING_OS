@@ -1,0 +1,15 @@
+{
+  "schema": "nusa.pascal.allowlist.v1",
+  "actions": {
+    "CREATE_SCENE": {"risk":"low","requires_human_approval":false},
+    "OPEN_SCENE": {"risk":"low","requires_human_approval":false},
+    "IMPORT": {"risk":"medium","requires_human_approval":false},
+    "EXPORT": {"risk":"medium","requires_human_approval":false},
+    "QUERY_SCENE": {"risk":"low","requires_human_approval":false}
+  },
+  "forbidden": [
+    "MARK_CONSTRUCTION_READY",
+    "APPROVE_STRUCTURAL_SAFETY",
+    "PUBLISH_IFC_FOR_CONSTRUCTION"
+  ]
+}
