@@ -1,0 +1,51 @@
+name: NUSA Runtime Acceptance
+on:
+  workflow_run:
+    workflows: ["Deploy NUSA to GitHub Pages"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify GitHub Pages runtime
+        env:
+          BASE_URL: https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/
+        run: |
+          set -euo pipefail
+          echo "Checking $BASE_URL"
+          curl --fail --silent --show-error --location --retry 8 --retry-delay 5 --retry-all-errors --max-time 30 "$BASE_URL" -o /tmp/nusa.html
+          test -s /tmp/nusa.html
+          grep -qi "NUSA" /tmp/nusa.html
+          grep -q "/NUSA_ENTERPRISE_ENGINEERING_OS/" /tmp/nusa.html
+          echo "NUSA runtime HTML: PASS"
+      - name: Verify static assets referenced by HTML
+        env:
+          BASE_URL: https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re, urllib.parse, urllib.request
+          base="https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/"
+          html=open("/tmp/nusa.html", encoding="utf-8").read()
+          urls=[]
+          for attr in ("src","href"):
+              urls += re.findall(r'%s="([^"]+)"' % attr, html)
+          urls=[u for u in urls if u.startswith(("/NUSA_ENTERPRISE_ENGINEERING_OS/","/_next/"))]
+          checked=0
+          for u in urls:
+              full=urllib.parse.urljoin(base,u)
+              try:
+                  with urllib.request.urlopen(full, timeout=20) as r:
+                      if r.status >= 400:
+                          raise RuntimeError(f"{r.status} {full}")
+              except Exception as e:
+                  raise SystemExit(f"ASSET FAIL: {e}")
+              checked += 1
+          print(f"Static asset checks: PASS ({checked} assets)")
+          PY
