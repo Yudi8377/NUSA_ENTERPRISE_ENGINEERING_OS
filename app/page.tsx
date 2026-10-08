@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Activity, ArrowUpRight, BarChart3, Building2, CheckCircle2, CircleDollarSign, ClipboardCheck, Command, FileText, Layers3, LogIn, Menu, MessageSquare, PanelLeft, Plus, ShieldCheck, Users, X, Zap } from "lucide-react";
 import { supabase } from "../lib/supabase";
@@ -9,9 +10,9 @@ import { retrieveKnowledge } from "../lib/knowledge";
 import { approvals, engineeringRuns, ingestionJobs } from "../lib/operations";
 
 const modules = [
-  ["Command Center", Command],["Projects & Construction", Building2],["Engineering & SAP2000", Activity],
-  ["Architecture / CAD / BIM", Layers3],["ERP & Finance", CircleDollarSign],["CRM", Users],
-  ["HRD & Payroll", Users],["Procurement & Asset", ClipboardCheck],["Reports & Forecast", BarChart3],["GRC & Compliance", ShieldCheck],
+  ["Command Center", Command, "/"],["Projects & Construction", Building2, "/projects/"],["Engineering & SAP2000", Activity, "/operations/"],
+  ["Architecture / CAD / BIM", Layers3, "/architecture/"],["ERP & Finance", CircleDollarSign, "/erp/"],["CRM", Users, "/crm/"],
+  ["HRD & Payroll", Users, "/hr/"],["Procurement & Asset", ClipboardCheck, "/procurement/"],["Reports & Forecast", BarChart3, "/reports/"],["GRC & Compliance", ShieldCheck, "/grc/"],
 ] as const;
 
 const phaseLabels = ["Platform","Finance","CRM","HR","Tax","Procurement","Construction","CAD","BIM","AI","Guardian","Self-Healing","BI","Integrations","Pilot","Hardening","Go Live"];
@@ -110,7 +111,7 @@ export default function Home() {
       <aside className="glass" style={{padding:18,position:"sticky",top:0,height:"100vh",zIndex:5}}>
         <button onClick={()=>setOpen(!open)} aria-label="Navigasi" style={{background:"none",border:0,color:"white",cursor:"pointer"}}>{open?<PanelLeft/>:<Menu/>}</button>
         {open&&<><div style={{margin:"22px 4px 28px"}}><div className="brand" style={{fontSize:23,fontWeight:700}}>NUSA</div><div className="muted" style={{fontSize:12}}>ENTERPRISE ENGINEERING OS</div></div>
-        {modules.map(([name,Icon])=><div key={name} style={{display:"flex",gap:11,alignItems:"center",padding:"11px 8px",borderRadius:10,color:"#b9c9c1",fontSize:13}}><Icon size={17}/>{name}</div>)}
+        {modules.map(([name,Icon,href])=><Link key={name} href={href} style={{display:"flex",gap:11,alignItems:"center",padding:"11px 8px",borderRadius:10,color:"#b9c9c1",fontSize:13,textDecoration:"none"}}><Icon size={17}/>{name}</Link>)}
         <div style={{marginTop:20,padding:12,borderTop:"1px solid #20352d",fontSize:11}} className="muted">PHASE 0 → GO LIVE<br/>Parallel workstreams active</div></>}
       </aside>
 
