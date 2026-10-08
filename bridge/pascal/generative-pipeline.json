@@ -1,0 +1,15 @@
+{
+  "schema": "nusa.generative.engineering.v1",
+  "input_modes": ["prompt","floorplan_image","scan","cad","bim","voice"],
+  "stages": ["requirements","space_program","floorplan_analysis","spatial_scene","architecture","engineering","quantity","cost","schedule","documents","review","approval"],
+  "pascal": {
+    "floorplan_vision_action": "analyze_floorplan_image",
+    "scene_actions": ["CREATE_SCENE","QUERY_SCENE","EXPORT"],
+    "validation_actions": ["validate_scene","verify_scene","check_collisions"]
+  },
+  "safety": {
+    "construction_ready_requires_human_approval": true,
+    "structural_safety_requires_human_approval": true,
+    "ifc_for_construction_requires_human_approval": true
+  }
+}
