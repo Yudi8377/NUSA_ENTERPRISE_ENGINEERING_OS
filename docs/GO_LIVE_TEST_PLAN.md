@@ -20,3 +20,6 @@ NUSA is not considered production-ready merely because the UI builds.
 - RED: build/security/deployment failure or an unsafe governance bypass exists.
 
 A production release requires GREEN. Engineering certification remains a human-controlled process even at GREEN.
+
+
+Verification run: release candidate 2026-10-08.
