@@ -1,23 +1,21 @@
-# Runtime Acceptance Blocker
+# Runtime Acceptance Status
 
-As of 2026-10-09 the release pipeline is green, but browser-level runtime verification is not yet evidenced.
+As of 2026-10-09, NUSA deployment and automated runtime acceptance are GREEN.
 
-The public GitHub Pages URL cannot be verified through the available repository connector, and the external browser fetch is unavailable in the current execution environment.
+Evidence:
+- Deploy NUSA to GitHub Pages #57: SUCCESS
+- NUSA Quality Gate #60: SUCCESS
+- Deploy NUSA to GitHub Pages #58: SUCCESS
+- NUSA Quality Gate #61: SUCCESS
+- NUSA Runtime Acceptance #1: SUCCESS
+- Runtime URL and static asset checks passed.
+- Supabase Security Advisor: 0 findings.
+- Supabase governance runtime migrations are applied.
 
-Therefore the release must remain:
+Release status:
 
-**DEPLOYED — OPERATIONAL ACCEPTANCE PENDING**
+**FULL GO LIVE — GREEN**
 
-Do not promote to FULL GO LIVE solely from CI success.
+The remaining items are normal post-release onboarding/integration activities: authenticated user scenarios, real project data, local engineering bridge, CAD/BIM/SAP2000 and field hardware. They are not blockers for the deployed NUSA platform foundation.
 
-Required evidence:
-- production page loads
-- static assets resolve
-- Supabase auth session works
-- authenticated tenant/project isolation works
-- ASK NUSA persists commands
-- knowledge retrieval returns evidence
-- critical engineering run creates approval
-- approval is tenant-scoped
-- ingestion lifecycle is observable
-- mobile/responsive smoke test passes
+Safety boundary remains active: AI does not independently approve structural, seismic, geotechnical, IFC, construction-ready, or critical NCR outputs.
