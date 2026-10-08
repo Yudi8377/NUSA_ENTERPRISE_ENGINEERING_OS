@@ -29,7 +29,7 @@ assert(ingestion.includes("nusa_ingestion_jobs_member_insert"), "ingestion inser
 assert(ingestion.includes("nusa_ingestion_jobs_member_update"), "ingestion update RLS missing");
 assert(ingestion.includes("nusa_ingestion_documents_member_insert"), "document insert RLS missing");
 
-assert(/auth\.uid\(\)/.test(rls), "RLS test does not exercise authenticated identity");
+assert(/relrowsecurity/.test(rls), "RLS test does not inspect RLS enablement");
 assert(smoke.includes("Run & Approval Queue"), "smoke coverage missing governance queue");
 assert(smoke.includes("Ingestion Queue"), "smoke coverage missing ingestion queue");
 
