@@ -67,6 +67,10 @@ export async function saveMemory(input: {
   }).select().single();
 }
 
+export async function knowledgeSearch(input: { tenantId?: string | null; query: string; domainCode?: string | null; limit?: number }) {
+  return retrieveKnowledge(input);
+}
+
 export async function startReasoningRun(input: {
   tenantId?: string | null;
   projectId?: string | null;
