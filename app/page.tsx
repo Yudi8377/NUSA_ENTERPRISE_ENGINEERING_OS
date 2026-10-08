@@ -12,15 +12,20 @@ const modules = [
 ] as const;
 
 const phaseLabels = ["Platform","Finance","CRM","HR","Tax","Procurement","Construction","CAD","BIM","AI","Guardian","Self-Healing","BI","Integrations","Pilot","Hardening","Go Live"];
+type NusaUser = { id: string; email?: string | null };
+type NusaTenant = { id: string; name?: string | null };
+type NusaProject = { id: string; progress?: number | null };
+type NusaAgent = { code?: string | null; name?: string | null; domain?: string | null; status?: string | null; risk_level?: string | null };
+type AgentFallback = [string, string, string];
 
 export default function Home() {
   const [open,setOpen]=useState(true);
   const [q,setQ]=useState("");
   const [messages,setMessages]=useState<string[]>([]);
-  const [user,setUser]=useState<any>(null);
-  const [tenant,setTenant]=useState<any>(null);
-  const [projectList,setProjectList]=useState<any[]>([]);
-  const [agents,setAgents]=useState<any[]>([]);
+  const [user,setUser]=useState<NusaUser | null>(null);
+  const [tenant,setTenant]=useState<NusaTenant | null>(null);
+  const [projectList,setProjectList]=useState<NusaProject[]>([]);
+  const [agents,setAgents]=useState<NusaAgent[]>([]);
   const [authOpen,setAuthOpen]=useState(false);
   const [mode,setMode]=useState<"signin"|"signup">("signin");
   const [email,setEmail]=useState("");
@@ -30,16 +35,20 @@ export default function Home() {
   const [notice,setNotice]=useState("");
 
   const load=async()=>{
-    const u=await currentUser(); setUser(u);
-    const a=await agentFleet(); if(!a.error) setAgents(a.data||[]);
+    const u=await currentUser(); setUser(u as NusaUser | null);
+    const a=await agentFleet(); if(!a.error) setAgents((a.data||[]) as NusaAgent[]);
     if(u){
       const t=await myTenants(); if(!t.error&&t.data?.[0]){
         setTenant(t.data[0]);
-        const p=await projects(t.data[0].id); if(!p.error) setProjectList(p.data||[]);
+        const p=await projects(t.data[0].id); if(!p.error) setProjectList((p.data||[]) as NusaProject[]);
       }
     }
   };
-  useEffect(()=>{load(); const {data}=supabase.auth.onAuthStateChange(()=>load()); return ()=>data.subscription.unsubscribe()},[]);
+  useEffect(()=>{
+    const timer=window.setTimeout(()=>{ void load(); },0);
+    const {data}=supabase.auth.onAuthStateChange(()=>{ void load(); });
+    return ()=>{ window.clearTimeout(timer); data.subscription.unsubscribe(); };
+  },[]);
 
   const ask=async()=>{
     const text=q.trim(); if(!text) return;
@@ -103,7 +112,7 @@ export default function Home() {
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginTop:22}}>{[["Structure","Human approval"],["MEP","Coordination"],["SAP2000","Awaiting site data"]].map(x=><div key={x[0]} style={{padding:12,background:"#0a1712",borderRadius:10}}><div className="muted" style={{fontSize:11}}>{x[0]}</div><div style={{fontSize:12,marginTop:5}}>{x[1]}</div></div>)}</div>
           </div>
           <div className="glass" style={{padding:20,borderRadius:16}}><div style={{display:"flex",justifyContent:"space-between"}}><div><div className="muted" style={{fontSize:12}}>AI WORKFORCE</div><h2 style={{margin:"5px 0 18px",fontSize:20}}>Agent Fleet</h2></div><Zap size={18}/></div>
-          {(agents.length?agents.slice(0,7):[["nusa.orchestrator","NUSA Orchestrator","online"],["engineering.structural","Structural Engineer","ready"],["engineering.sap2000","SAP2000 Copilot","ready"]]).map((a:any)=><div key={a.code||a[0]} style={{display:"flex",gap:12,alignItems:"center",padding:"10px 0",borderBottom:"1px solid #173027"}}><div style={{width:8,height:8,borderRadius:50,background:"#8ed8a6"}}/><div style={{flex:1}}><div style={{fontSize:13}}>{a.name||a[1]}</div><div className="muted" style={{fontSize:10}}>{a.domain||a[2]}</div></div><span style={{fontSize:10}}>{a.status||"ready"}</span></div>)}
+          {(agents.length?agents.slice(0,7):([["nusa.orchestrator","NUSA Orchestrator","online"],["engineering.structural","Structural Engineer","ready"],["engineering.sap2000","SAP2000 Copilot","ready"]] as AgentFallback[])).map((a) style={{display:"flex",gap:12,alignItems:"center",padding:"10px 0",borderBottom:"1px solid #173027"}}><div style={{width:8,height:8,borderRadius:50,background:"#8ed8a6"}}/><div style={{flex:1}}><div style={{fontSize:13}}>{Array.isArray(a)?a[1]:a.name}</div><div className="muted" style={{fontSize:10}}>{Array.isArray(a)?a[2]:a.domain}</div></div><span style={{fontSize:10}}>{Array.isArray(a)?a[2]:(a.status||"ready")}</span></div>)}
           <div className="muted" style={{fontSize:10,marginTop:12}}>{critical} critical-risk agents require approval.</div></div>
         </div>
 
