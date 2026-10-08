@@ -5,6 +5,7 @@ import { Activity, ArrowUpRight, BarChart3, Building2, CheckCircle2, CircleDolla
 import { supabase } from "../lib/supabase";
 import { agentFleet, createTenant, currentUser, myTenants, projects, queueCommand } from "../lib/nusa";
 import { spatialModels } from "../lib/pascal";
+import { retrieveKnowledge } from "../lib/knowledge";
 
 const modules = [
   ["Command Center", Command],["Projects & Construction", Building2],["Engineering & SAP2000", Activity],
@@ -35,6 +36,9 @@ export default function Home() {
   const [workspace,setWorkspace]=useState("");
   const [busy,setBusy]=useState(false);
   const [notice,setNotice]=useState("");
+  const [knowledgeQuery,setKnowledgeQuery]=useState("");
+  const [knowledgeResults,setKnowledgeResults]=useState<Array<{id:string;title:string;domain_code:string|null;content:string;authority_level:string;confidence:number}>>([]);
+  const [knowledgeBusy,setKnowledgeBusy]=useState(false);
 
   const load=async()=>{
     const u=await currentUser(); setUser(u as NusaUser | null);
@@ -60,6 +64,15 @@ export default function Home() {
     const r=await queueCommand(tenant.id,user.id,text);
     if(r.error) setMessages(m=>[...m,"NUSA: Perintah belum masuk antrean: "+r.error.message]);
     else setMessages(m=>[...m,"NUSA: Perintah diterima. Orchestrator akan mendelegasikan tugas sesuai kebijakan dan approval gate."]);
+  };
+
+  const searchKnowledge=async()=>{
+    const query=knowledgeQuery.trim(); if(!query) return;
+    setKnowledgeBusy(true); setNotice("");
+    const r=await retrieveKnowledge({tenantId:tenant?.id,query,limit:6});
+    if(r.error){setNotice("Knowledge search gagal: "+r.error.message);setKnowledgeResults([]);}
+    else setKnowledgeResults((r.data||[]) as typeof knowledgeResults);
+    setKnowledgeBusy(false);
   };
 
   const auth=async()=>{
@@ -138,6 +151,13 @@ export default function Home() {
           <div className="glass" style={{padding:20,borderRadius:16}}><div style={{display:"flex",justifyContent:"space-between"}}><div><div className="muted" style={{fontSize:12}}>AI WORKFORCE</div><h2 style={{margin:"5px 0 18px",fontSize:20}}>Agent Fleet</h2></div><Zap size={18}/></div>
           {(agents.length?agents.slice(0,7):([["nusa.orchestrator","NUSA Orchestrator","online"],["engineering.structural","Structural Engineer","ready"],["engineering.sap2000","SAP2000 Copilot","ready"]] as AgentFallback[])).map((a) => <div key={Array.isArray(a) ? a[0] : (a.code || a.name || "agent")} style={{display:"flex",gap:12,alignItems:"center",padding:"10px 0",borderBottom:"1px solid #173027"}}><div style={{width:8,height:8,borderRadius:50,background:"#8ed8a6"}}/><div style={{flex:1}}><div style={{fontSize:13}}>{Array.isArray(a)?a[1]:a.name}</div><div className="muted" style={{fontSize:10}}>{Array.isArray(a)?a[2]:a.domain}</div></div><span style={{fontSize:10}}>{Array.isArray(a)?a[2]:(a.status||"ready")}</span></div>)}
           <div className="muted" style={{fontSize:10,marginTop:12}}>{critical} critical-risk agents require approval.</div></div>
+        </div>
+
+        <div className="glass intelligence-panel" style={{padding:20,borderRadius:16,marginTop:16}}>
+          <div className="panel-heading"><div><div className="muted" style={{fontSize:12}}>KNOWLEDGE BRAIN</div><h2 style={{margin:"5px 0 3px",fontSize:19}}>NUSA Intelligence Studio</h2><div className="muted" style={{fontSize:11}}>Cari pengetahuan terverifikasi sebelum NUSA melakukan reasoning.</div></div><ShieldCheck size={19}/></div>
+          <div className="knowledge-search"><input value={knowledgeQuery} onChange={e=>setKnowledgeQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&searchKnowledge()} placeholder="Contoh: kebutuhan data untuk analisis struktur Yayasan Ngawi" /><button onClick={searchKnowledge} disabled={knowledgeBusy}>{knowledgeBusy?"Mencari…":"Cari Knowledge"}</button></div>
+          {knowledgeResults.length>0&&<div className="knowledge-results">{knowledgeResults.map(k=><div className="knowledge-item" key={k.id}><div className="knowledge-top"><b>{k.title}</b><span>{k.domain_code||"core"} · {k.authority_level} · {Math.round(Number(k.confidence)*100)}%</span></div><div className="muted knowledge-content">{k.content}</div></div>)}</div>}
+          {knowledgeQuery && knowledgeResults.length===0 && !knowledgeBusy && <div className="empty-state">Belum ada knowledge terindeks untuk pertanyaan ini. NUSA tidak mengarang jawaban dari data yang belum tersedia.</div>}
         </div>
 
         <div className="glass" style={{padding:18,borderRadius:16,marginTop:16}}>
