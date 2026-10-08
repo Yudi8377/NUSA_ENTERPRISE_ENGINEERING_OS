@@ -13,6 +13,7 @@ jobs:
         with:
           node-version: 24
       - run: npm install
+      - run: npm run test:smoke
       - run: npm run lint
       - run: npm run build
         env:
