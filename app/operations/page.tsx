@@ -32,7 +32,7 @@ export default function OperationsPage() {
     if(!a.error) setApprovalRows((a.data||[]) as Approval[]);
   };
 
-  useEffect(()=>{ void refresh(); const {data}=supabase.auth.onAuthStateChange(()=>void refresh()); return ()=>data.subscription.unsubscribe(); },[]);
+  useEffect(()=>{ let active=true; void (async()=>{ if(active) await refresh(); })(); const {data}=supabase.auth.onAuthStateChange(()=>{ if(active) void refresh(); }); return ()=>{ active=false; data.subscription.unsubscribe(); }; },[]);
 
   const submit=async(e:FormEvent)=>{
     e.preventDefault();
