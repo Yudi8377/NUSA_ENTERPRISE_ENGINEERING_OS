@@ -6,6 +6,7 @@ import { supabase } from "../lib/supabase";
 import { agentFleet, createTenant, currentUser, myTenants, projects, queueCommand } from "../lib/nusa";
 import { spatialModels } from "../lib/pascal";
 import { retrieveKnowledge } from "../lib/knowledge";
+import { approvals, engineeringRuns, ingestionJobs } from "../lib/operations";
 
 const modules = [
   ["Command Center", Command],["Projects & Construction", Building2],["Engineering & SAP2000", Activity],
@@ -39,6 +40,9 @@ export default function Home() {
   const [knowledgeQuery,setKnowledgeQuery]=useState("");
   const [knowledgeResults,setKnowledgeResults]=useState<Array<{id:string;title:string;domain_code:string|null;content:string;authority_level:string;confidence:number}>>([]);
   const [knowledgeBusy,setKnowledgeBusy]=useState(false);
+  const [runList,setRunList]=useState<Array<{id:string;run_type:string;status:string;criticality:string;agent_code:string|null;created_at:string}>>([]);
+  const [approvalList,setApprovalList]=useState<Array<{id:string;approval_type:string;status:string;created_at:string}>>([]);
+  const [ingestionList,setIngestionList]=useState<Array<{id:string;source_kind:string;source_name:string;status:string;created_at:string}>>([]);
 
   const load=async()=>{
     const u=await currentUser(); setUser(u as NusaUser | null);
@@ -48,6 +52,10 @@ export default function Home() {
         setTenant(t.data[0]);
         const p=await projects(t.data[0].id); if(!p.error) setProjectList((p.data||[]) as NusaProject[]);
         const s=await spatialModels(t.data[0].id); if(!s.error) setSpatialList((s.data||[]) as Array<{id:string;code:string;name:string;status:string;engine:string;updated_at:string}>);
+        const [runs,aps,ing]=await Promise.all([engineeringRuns(t.data[0].id),approvals(t.data[0].id),ingestionJobs(t.data[0].id)]);
+        if(!runs.error) setRunList((runs.data||[]) as typeof runList);
+        if(!aps.error) setApprovalList((aps.data||[]) as typeof approvalList);
+        if(!ing.error) setIngestionList((ing.data||[]) as typeof ingestionList);
       }
     }
   };
@@ -95,6 +103,7 @@ export default function Home() {
   const activeProjects=projectList.length;
   const progress=projectList.length ? Math.round(projectList.reduce((s,p)=>s+Number(p.progress||0),0)/projectList.length) : 0;
   const critical=agents.filter(a=>a.risk_level==="critical").length;
+  const pendingApprovals=approvalList.filter(a=>a.status==="pending").length;
 
   return <main className="nusa gridbg">
     <div style={{display:"grid",gridTemplateColumns:open?"272px 1fr":"72px 1fr",minHeight:"100vh"}}>
@@ -151,6 +160,27 @@ export default function Home() {
           <div className="glass" style={{padding:20,borderRadius:16}}><div style={{display:"flex",justifyContent:"space-between"}}><div><div className="muted" style={{fontSize:12}}>AI WORKFORCE</div><h2 style={{margin:"5px 0 18px",fontSize:20}}>Agent Fleet</h2></div><Zap size={18}/></div>
           {(agents.length?agents.slice(0,7):([["nusa.orchestrator","NUSA Orchestrator","online"],["engineering.structural","Structural Engineer","ready"],["engineering.sap2000","SAP2000 Copilot","ready"]] as AgentFallback[])).map((a) => <div key={Array.isArray(a) ? a[0] : (a.code || a.name || "agent")} style={{display:"flex",gap:12,alignItems:"center",padding:"10px 0",borderBottom:"1px solid #173027"}}><div style={{width:8,height:8,borderRadius:50,background:"#8ed8a6"}}/><div style={{flex:1}}><div style={{fontSize:13}}>{Array.isArray(a)?a[1]:a.name}</div><div className="muted" style={{fontSize:10}}>{Array.isArray(a)?a[2]:a.domain}</div></div><span style={{fontSize:10}}>{Array.isArray(a)?a[2]:(a.status||"ready")}</span></div>)}
           <div className="muted" style={{fontSize:10,marginTop:12}}>{critical} critical-risk agents require approval.</div></div>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1.2fr 1fr 1fr",gap:16,marginTop:16}}>
+          <div className="glass" style={{padding:18,borderRadius:16}}>
+            <div className="muted" style={{fontSize:11}}>ENGINEERING GOVERNANCE</div>
+            <h2 style={{margin:"5px 0 12px",fontSize:18}}>Run & Approval Queue</h2>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12}}>
+              <span className="status-pill">Runs {runList.length}</span><span className="status-pill">Pending approval {pendingApprovals}</span>
+            </div>
+            {runList.length?runList.slice(0,4).map(r=><div key={r.id} style={{padding:"9px 0",borderBottom:"1px solid #173027",fontSize:11}}><b>{r.run_type}</b><span className="muted"> · {r.criticality} · {r.status}</span><div className="muted">{r.agent_code||"unassigned"}</div></div>):<div className="empty-state">Belum ada engineering run tercatat.</div>}
+          </div>
+          <div className="glass" style={{padding:18,borderRadius:16}}>
+            <div className="muted" style={{fontSize:11}}>HUMAN APPROVAL</div>
+            <h2 style={{margin:"5px 0 12px",fontSize:18}}>Approval Gate</h2>
+            {approvalList.length?approvalList.slice(0,4).map(a=><div key={a.id} style={{padding:"9px 0",borderBottom:"1px solid #173027",fontSize:11}}><b>{a.approval_type}</b><span className="muted"> · {a.status}</span></div>):<div className="empty-state">Tidak ada approval yang menunggu keputusan.</div>}
+          </div>
+          <div className="glass" style={{padding:18,borderRadius:16}}>
+            <div className="muted" style={{fontSize:11}}>KNOWLEDGE INGESTION</div>
+            <h2 style={{margin:"5px 0 12px",fontSize:18}}>Ingestion Queue</h2>
+            {ingestionList.length?ingestionList.slice(0,4).map(j=><div key={j.id} style={{padding:"9px 0",borderBottom:"1px solid #173027",fontSize:11}}><b>{j.source_name}</b><span className="muted"> · {j.status}</span><div className="muted">{j.source_kind}</div></div>):<div className="empty-state">Belum ada dokumen dalam antrean.</div>}
+          </div>
         </div>
 
         <div className="glass intelligence-panel" style={{padding:20,borderRadius:16,marginTop:16}}>
