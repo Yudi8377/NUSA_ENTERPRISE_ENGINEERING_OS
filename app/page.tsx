@@ -115,6 +115,7 @@ export default function Home() {
         <div className="glass" style={{padding:18,borderRadius:16,marginTop:16}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div className="muted" style={{fontSize:12}}>PARALLEL DELIVERY</div><h2 style={{margin:"5px 0 14px",fontSize:19}}>Phase 0 → 18</h2></div><CheckCircle2 size={18}/></div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(9,minmax(0,1fr))",gap:6}}>{phaseLabels.map((p,i)=><div key={p} title={p} style={{height:8,borderRadius:6,background:i<5?"#8ed8a6":"#29463a"}}/>)}
+          </div>
           <div className="muted" style={{fontSize:11,marginTop:10}}>Foundation, data governance, ERP, engineering, AI, self-healing, BI, pilot and hardening are tracked as one governed release train.</div>
         </div>
 
