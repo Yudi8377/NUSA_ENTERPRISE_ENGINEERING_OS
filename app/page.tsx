@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Activity, ArrowUpRight, BarChart3, Building2, CheckCircle2, CircleDollarSign, ClipboardCheck, Command, FileText, Layers3, LogIn, Menu, MessageSquare, PanelLeft, Plus, ShieldCheck, Users, X, Zap } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { agentFleet, createTenant, currentUser, myTenants, projects, queueCommand } from "../lib/nusa";
+import { spatialModels } from "../lib/pascal";
 
 const modules = [
   ["Command Center", Command],["Projects & Construction", Building2],["Engineering & SAP2000", Activity],
@@ -26,6 +27,7 @@ export default function Home() {
   const [tenant,setTenant]=useState<NusaTenant | null>(null);
   const [projectList,setProjectList]=useState<NusaProject[]>([]);
   const [agents,setAgents]=useState<NusaAgent[]>([]);
+  const [spatialList,setSpatialList]=useState<Array<{id:string;code:string;name:string;status:string;engine:string;updated_at:string}>>([]);
   const [authOpen,setAuthOpen]=useState(false);
   const [mode,setMode]=useState<"signin"|"signup">("signin");
   const [email,setEmail]=useState("");
@@ -41,6 +43,7 @@ export default function Home() {
       const t=await myTenants(); if(!t.error&&t.data?.[0]){
         setTenant(t.data[0]);
         const p=await projects(t.data[0].id); if(!p.error) setProjectList((p.data||[]) as NusaProject[]);
+        const s=await spatialModels(t.data[0].id); if(!s.error) setSpatialList((s.data||[]) as Array<{id:string;code:string;name:string;status:string;engine:string;updated_at:string}>);
       }
     }
   };
@@ -103,6 +106,27 @@ export default function Home() {
         </div>
 
         {!tenant&&user&&<div className="glass" style={{padding:18,borderRadius:16,marginTop:16,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}><div style={{flex:1}}><b>Belum ada workspace.</b><div className="muted" style={{fontSize:12}}>Buat tenant pertama untuk mengaktifkan isolasi data dan audit trail.</div></div><input value={workspace} onChange={e=>setWorkspace(e.target.value)} placeholder="Nama perusahaan / organisasi" style={{background:"#09150f",border:"1px solid #254438",borderRadius:9,padding:"10px 12px",color:"white"}}/><button onClick={onboard} disabled={busy} style={{background:"#d8f5df",border:0,borderRadius:9,padding:"10px 14px",fontWeight:700}}><Plus size={15}/> Buat Workspace</button></div>}
+
+        <div className="glass" style={{padding:18,borderRadius:16,marginTop:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div><div className="muted" style={{fontSize:12}}>SPATIAL ENGINE</div><h2 style={{margin:"5px 0 3px",fontSize:19}}>Pascal Architectural Workspace</h2><div className="muted" style={{fontSize:11}}>Local-first 3D authoring · NUSA evidence · Human approval boundary</div></div>
+            <Layers3 size={19}/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1.3fr 1fr",gap:14,marginTop:14}}>
+            <div style={{padding:14,background:"#0a1712",borderRadius:11}}>
+              <div style={{fontSize:13,fontWeight:700}}>Yayasan Ngawi Spatial Pilot</div>
+              <div className="muted" style={{fontSize:11,marginTop:5}}>26 × 8 m · 2 lantai · preliminary architectural scene</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:12}}>
+                {["CREATE_SCENE","OPEN_SCENE","IMPORT","EXPORT","QUERY_SCENE"].map(a=><span key={a} style={{border:"1px solid #29463a",borderRadius:999,padding:"5px 8px",fontSize:9,color:"#a9d8b7"}}>{a}</span>)}
+              </div>
+            </div>
+            <div style={{padding:14,background:"#0a1712",borderRadius:11}}>
+              <div className="muted" style={{fontSize:11}}>REGISTERED SPATIAL MODELS</div>
+              <div className="brand" style={{fontSize:25,fontWeight:700,marginTop:4}}>{spatialList.length}</div>
+              <div className="muted" style={{fontSize:10}}>Supabase metadata · Pascal artifacts remain local/cloud evidence</div>
+            </div>
+          </div>
+        </div>
 
         <div style={{display:"grid",gridTemplateColumns:"1.5fr 1fr",gap:16,marginTop:16}}>
           <div className="glass" style={{padding:20,borderRadius:16}}>
