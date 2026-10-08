@@ -27,7 +27,7 @@ jobs:
           if [ -d out ]; then touch out/.nojekyll; else echo "Build did not produce out/"; exit 1; fi
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: out
   deploy:
     environment:
       name: github-pages
