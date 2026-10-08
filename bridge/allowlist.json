@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "commands": [
+    "sap2000.prepare_model",
+    "sap2000.run_analysis",
+    "sap2000.export_results",
+    "cad.validate_dxf",
+    "cad.export_pdf",
+    "bim.validate_ifc",
+    "bim.run_clash_check",
+    "sketchup.export_model",
+    "python.run_calculator"
+  ],
+  "critical_requires_approval": true,
+  "arbitrary_shell": false,
+  "delete_source": false
+}
