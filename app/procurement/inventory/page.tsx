@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="inventory" title="Inventory & Materials" eyebrow="PROCUREMENT / INVENTORY CONTROL" description="Kelola SKU, lokasi gudang, stok, reorder point, kondisi, dan catatan inspeksi material." recordType="procurement_inventory" recordLabel="Item inventaris"/>}
