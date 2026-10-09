@@ -7,6 +7,7 @@ import { currentUser, myTenants, projects as getProjects } from "../lib/nusa";
 
 type Tenant={id:string;name:string;code:string;status:string};
 type ProjectRow={id:string;code:string;name:string;status:string};
+type EmployeeRow={id:string;employee_code:string;full_name:string;position_title:string|null;employment_status:string;project_id:string|null};
 type RecordRow={id:string;project_id:string|null;record_type:string;record_code:string|null;title:string;description:string|null;status:string;amount:number|null;currency:string;data:Record<string,unknown>;created_at:string;updated_at:string};
 type ModuleCode="erp"|"crm"|"hr"|"procurement"|"reports"|"grc";
 type Field={key:string;label:string;type:"text"|"email"|"tel"|"date"|"number"|"url"|"textarea"|"select";required?:boolean;placeholder?:string;options?:string[];help?:string};
@@ -68,6 +69,7 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
  const [tenantList,setTenantList]=useState<Tenant[]>([]);
  const [tenantId,setTenantId]=useState("");
  const [projectList,setProjectList]=useState<ProjectRow[]>([]);
+ const [employeeList,setEmployeeList]=useState<EmployeeRow[]>([]);
  const [projectId,setProjectId]=useState("");
  const [rows,setRows]=useState<RecordRow[]>([]);
  const [userId,setUserId]=useState("");
@@ -83,7 +85,7 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
  const refresh=useCallback(async()=>{
   setLoading(true);setError("");
   const user=await currentUser();
-  if(!user){setUserId("");setRows([]);setTenantList([]);setProjectList([]);setProjectId("");setLoading(false);return;}
+  if(!user){setUserId("");setRows([]);setTenantList([]);setProjectList([]);setEmployeeList([]);setProjectId("");setLoading(false);return;}
   setUserId(user.id);
   const tenantResult=await myTenants();
   if(tenantResult.error){setError(tenantResult.error.message);setLoading(false);return;}
@@ -91,14 +93,16 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
   setTenantList(tenants);
   const activeId=tenants.some(t=>t.id===tenantId)?tenantId:(tenants[0]?.id??"");
   setTenantId(activeId);
-  if(!activeId){setRows([]);setProjectList([]);setProjectId("");setLoading(false);return;}
-  const [projectResult,result]=await Promise.all([
+  if(!activeId){setRows([]);setProjectList([]);setEmployeeList([]);setProjectId("");setLoading(false);return;}
+  const [projectResult,result,employeeResult]=await Promise.all([
    getProjects(activeId),
-   supabase.from("nusa_workspace_records").select("id,project_id,record_type,record_code,title,description,status,amount,currency,data,created_at,updated_at").eq("tenant_id",activeId).eq("module_code",moduleCode).is("archived_at",null).order("updated_at",{ascending:false}).limit(100)
+   supabase.from("nusa_workspace_records").select("id,project_id,record_type,record_code,title,description,status,amount,currency,data,created_at,updated_at").eq("tenant_id",activeId).eq("module_code",moduleCode).is("archived_at",null).order("updated_at",{ascending:false}).limit(100),
+   moduleCode==="hr" ? supabase.from("nusa_employees").select("id,employee_code,full_name,position_title,employment_status,project_id").eq("tenant_id",activeId).is("archived_at",null).order("full_name",{ascending:true}) : Promise.resolve({data:[],error:null})
   ]);
   if(projectResult.error)setError("Gagal memuat proyek: "+projectResult.error.message);
   else{const ps=(projectResult.data??[]) as ProjectRow[];setProjectList(ps);setProjectId(current=>ps.some(p=>p.id===current)?current:(ps[0]?.id??""));}
   if(result.error)setError("Gagal memuat rekaman: "+result.error.message);else setRows((result.data??[]) as RecordRow[]);
+  if(employeeResult.error)setError("Gagal memuat master pegawai: "+employeeResult.error.message);else setEmployeeList((employeeResult.data??[]) as EmployeeRow[]);
   setLoading(false);
  },[moduleCode,tenantId]);
  useEffect(()=>{const timer=window.setTimeout(()=>{void refresh();},0);return()=>window.clearTimeout(timer);},[refresh]);
@@ -134,8 +138,10 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
  const renderField=(field:Field)=>{
   const value=fieldValues[field.key]??"";
   const common={name:field.key,required:field.required??false,value,onChange:(e:React.ChangeEvent<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>)=>setFieldValues(prev=>({...prev,[field.key]:e.target.value})),style:fieldStyle};
+  const employeeSelect=moduleCode==="hr"&&field.key==="employee_name";
   return <label key={field.key} style={{fontSize:12,display:"block"}}>{field.label}{field.required&&<span style={{color:"#a9d8b7"}}> *</span>}
-   {field.type==="select"?<select {...common} style={{...fieldStyle,cursor:"pointer"}}><option value="">Pilih {field.label.toLowerCase()}</option>{(field.options??[]).map(option=><option key={option} value={option}>{option}</option>)}</select>
+   {employeeSelect?<select {...common} style={{...fieldStyle,cursor:"pointer"}}><option value="">Pilih pegawai atau isi jabatan umum</option>{employeeList.map(employee=><option key={employee.id} value={employee.full_name}>{employee.employee_code} · {employee.full_name}{employee.position_title?" — "+employee.position_title:""}</option>)}</select>
+   :field.type==="select"?<select {...common} style={{...fieldStyle,cursor:"pointer"}}><option value="">Pilih {field.label.toLowerCase()}</option>{(field.options??[]).map(option=><option key={option} value={option}>{option}</option>)}</select>
    :field.type==="textarea"?<textarea {...common} rows={3} placeholder={field.placeholder} style={{...fieldStyle,resize:"vertical"}}/>
    :<input {...common} type={field.type} min={field.type==="number"?"0":undefined} step={field.type==="number"?"any":undefined} placeholder={field.placeholder} style={fieldStyle}/>}
    {field.help&&<span className="muted" style={{display:"block",fontSize:10,marginTop:4}}>{field.help}</span>}
@@ -144,6 +150,15 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
  return <main className="nusa gridbg"><div style={{minHeight:"100vh",padding:"24px",maxWidth:1440,margin:"0 auto"}}>
   <Link href="/" style={{display:"inline-flex",gap:8,alignItems:"center",color:"#a9d8b7",textDecoration:"none",fontSize:13}}><ArrowLeft size={16}/> Command Center</Link>
   <header style={{marginTop:34,display:"flex",justifyContent:"space-between",alignItems:"end",gap:18,flexWrap:"wrap"}}><div><div className="muted" style={{fontSize:11,letterSpacing:".13em"}}>{eyebrow}</div><h1 className="brand" style={{fontSize:40,margin:"8px 0"}}>{title}</h1><p className="muted" style={{fontSize:14,lineHeight:1.7,maxWidth:760}}>{description}</p></div><button onClick={()=>void refresh()} disabled={loading} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #29463a",cursor:loading?"wait":"pointer",opacity:loading ? 0.65 : 1}}><RefreshCw size={15}/> {loading?"Memuat…":"Muat ulang"}</button></header>
+  {moduleCode==="hr"&&userId&&tenantId&&<section className="glass" style={{marginTop:16,padding:18,borderRadius:14}}>
+   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}><div><div className="muted" style={{fontSize:10,letterSpacing:".12em"}}>PEOPLE DIRECTORY</div><h2 style={{fontSize:19,margin:"7px 0"}}>Direktori pegawai organisasi</h2><p className="muted" style={{fontSize:12,margin:0}}>Data diambil dari Master Data, bukan diketik ulang di catatan HR.</p></div><Link href="/master-data/?tab=employees" style={{color:"#a9d8b7",fontSize:12}}>Kelola master pegawai →</Link></div>
+   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10,marginTop:14}}>
+    <div style={{padding:13,border:"1px solid #29463a",borderRadius:10}}><div className="muted" style={{fontSize:10}}>TOTAL PEGAWAI AKTIF</div><div style={{fontSize:25,fontWeight:700}}>{employeeList.filter(e=>e.employment_status==="active").length}</div></div>
+    <div style={{padding:13,border:"1px solid #29463a",borderRadius:10}}><div className="muted" style={{fontSize:10}}>TERHUBUNG KE PROYEK</div><div style={{fontSize:25,fontWeight:700}}>{employeeList.filter(e=>e.project_id).length}</div></div>
+    <div style={{padding:13,border:"1px solid #29463a",borderRadius:10}}><div className="muted" style={{fontSize:10}}>CATATAN HR</div><div style={{fontSize:25,fontWeight:700}}>{rows.length}</div></div>
+   </div>
+   {loading?<p className="muted">Memuat direktori pegawai…</p>:employeeList.length===0?<p className="muted" style={{fontSize:12}}>Belum ada master pegawai di organisasi ini. Tambahkan pegawai atau muat data contoh dari Master Data.</p>:<div style={{overflowX:"auto",marginTop:12}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:520}}><thead><tr>{["Kode","Pegawai","Jabatan","Status","Proyek"].map(x=><th key={x} style={{textAlign:"left",padding:"10px 8px",borderBottom:"1px solid #29463a",color:"#9eb5a7"}}>{x}</th>)}</tr></thead><tbody>{employeeList.slice(0,10).map(employee=><tr key={employee.id}><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329"}}>{employee.employee_code}</td><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329",fontWeight:700}}>{employee.full_name}</td><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329"}}>{employee.position_title||"—"}</td><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329"}}>{employee.employment_status}</td><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329"}}>{projectList.find(p=>p.id===employee.project_id)?.name||"—"}</td></tr>)}</tbody></table>{employeeList.length>10&&<p className="muted" style={{fontSize:11}}>Menampilkan 10 dari {employeeList.length} pegawai. Buka Master Data untuk seluruh daftar.</p>}</div>}
+  </section>}
   {!userId?<section className="glass" style={{marginTop:24,padding:24,borderRadius:16}}><h2 style={{marginTop:0}}>Sesi pengguna diperlukan</h2><p className="muted">Masuk melalui Command Center untuk membuka data organisasi. Akses dibatasi oleh keanggotaan tenant di database.</p><Link href="/" style={{color:"#a9d8b7"}}>Kembali ke Command Center →</Link></section>:<><section className="glass" style={{marginTop:22,padding:16,borderRadius:14,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}><div style={{flex:1,minWidth:220}}><div className="muted" style={{fontSize:10,marginBottom:6}}>ORGANISASI</div><select value={tenantId} onChange={e=>{setTenantId(e.target.value);setProjectId("");}} style={{width:"100%",maxWidth:480,padding:11,background:"#0b1712",color:"#e7f2eb",border:"1px solid #29463a",borderRadius:9}}><option value="">Pilih organisasi</option>{tenantList.map(t=><option key={t.id} value={t.id}>{t.name} · {t.code}</option>)}</select></div><div style={{flex:"1 1 220px"}}><div className="muted" style={{fontSize:10,marginBottom:6}}>PROYEK TERKAIT</div><select value={projectId} onChange={e=>setProjectId(e.target.value)} style={{width:"100%",maxWidth:480,padding:11,background:"#0b1712",color:"#e7f2eb",border:"1px solid #29463a",borderRadius:9}}><option value="">Tanpa proyek spesifik</option>{projectList.map(p=><option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}</select></div><div><div className="muted" style={{fontSize:10}}>REKAMAN AKTIF</div><div style={{fontSize:26,fontWeight:700}}>{rows.length}</div></div><div style={{display:"flex",alignItems:"center",gap:7,color:"#9fd5ae",fontSize:12}}><ShieldCheck size={16}/> Tenant-scoped + audit trail</div></section>
   {!tenantId?<section className="glass" style={{marginTop:16,padding:20,borderRadius:14}}><p className="muted">Belum ada organisasi yang dapat diakses.</p><Link href="/master-data/" style={{color:"#a9d8b7"}}>Buat organisasi di Master Data →</Link></section>:<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,360px),1fr))",gap:16,marginTop:16,alignItems:"start"}}><section className="glass" style={{padding:18,borderRadius:14}}><div style={{display:"flex",alignItems:"center",gap:9}}><FileText size={18} color="#a9d8b7"/><h2 style={{fontSize:18,margin:0}}>Buat {recordLabel.toLowerCase()}</h2></div><p className="muted" style={{fontSize:12,lineHeight:1.6,marginTop:9}}>Formulir khusus {title}. Rekaman disimpan sebagai draf dan belum berarti persetujuan atau transaksi final.</p><form noValidate onSubmit={addRecord} style={{display:"grid",gap:11}}><label style={{fontSize:12,display:"block"}}>{config.titleLabel} <span style={{color:"#a9d8b7"}}>*</span><input required maxLength={180} value={newTitle} onChange={e=>setNewTitle(e.target.value)} placeholder={"Isi "+config.titleLabel.toLowerCase()} style={fieldStyle}/></label>{config.fields.map(renderField)}{config.showAmount&&<label style={{fontSize:12,display:"block"}}>{config.amountLabel}<input type="number" min="0" step="any" inputMode="decimal" value={newAmount} onChange={e=>setNewAmount(e.target.value)} placeholder="0" style={fieldStyle}/><span className="muted" style={{display:"block",fontSize:10,marginTop:4}}>{config.amountHelp}</span></label>}<label style={{fontSize:12,display:"block"}}>{config.descriptionLabel}<textarea value={newDescription} onChange={e=>setNewDescription(e.target.value)} rows={3} maxLength={5000} placeholder={config.descriptionPlaceholder} style={{...fieldStyle,resize:"vertical"}}/></label><button disabled={saving||loading||!tenantId} type="submit" style={{display:"inline-flex",justifyContent:"center",alignItems:"center",gap:8,padding:12,border:0,borderRadius:9,background:"#a9d8b7",color:"#10251a",fontWeight:700,cursor:saving||loading?"wait":"pointer",opacity:saving||loading ? 0.65 : 1}}><Plus size={16}/>{saving?"Menyimpan…":config.submitLabel}</button></form></section>
   <section className="glass" style={{padding:18,borderRadius:14,minWidth:0}}><div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center",flexWrap:"wrap"}}><h2 style={{fontSize:18,margin:0}}>Daftar {recordLabel.toLowerCase()}</h2><div style={{position:"relative",flex:"1 1 180px",maxWidth:280}}><Search size={15} style={{position:"absolute",left:10,top:12,opacity:.65}}/><input aria-label={"Cari "+recordLabel} value={query} onChange={e=>setQuery(e.target.value)} placeholder={"Cari "+config.titleLabel.toLowerCase()+"…"} style={{...fieldStyle,paddingLeft:32,marginTop:0}}/></div></div>
