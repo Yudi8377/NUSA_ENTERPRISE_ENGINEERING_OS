@@ -45,6 +45,7 @@ export default function MasterDataPage(){
  const [newOrgName,setNewOrgName]=useState("");
  const [newOrgCode,setNewOrgCode]=useState("");
 
+ useEffect(()=>{const requested=new URLSearchParams(window.location.search).get("tab");if(requested&&tabs.some(t=>t.id===requested))setTab(requested as Tab);},[]);
  const refresh=useCallback(async()=>{
    setLoading(true);setError("");
    const u=await currentUser();
