@@ -55,7 +55,9 @@ const routes:{label:string;path:string;keywords:string[]}[]=[
  {label:"Budgets & Forecast",path:"/erp/budgets/",keywords:["anggaran erp","budget control"]},
  {label:"Tax & Compliance",path:"/erp/tax/",keywords:["pajak erp","tax compliance"]},
  {label:"Bank Reconciliation",path:"/erp/bank-reconciliation/",keywords:["rekonsiliasi bank","bank reconciliation"]},
- {label:"Fixed Assets",path:"/erp/fixed-assets/",keywords:["aset tetap","fixed assets"]},
+ {label:"Fixed Assets",path:"/erp/fixed-assets/",keywords:["aset tetap","depresiasi","fixed assets"]},
+ {label:"Expenses & Claims",path:"/erp/expenses/",keywords:["biaya","expense","klaim biaya","expenses"]},
+ {label:"Financial Reports",path:"/erp/reports/",keywords:["laporan keuangan","financial reports","neraca","laba rugi","arus kas"]},
  {label:"Cost Centres",path:"/erp/cost-centers/",keywords:["pusat biaya","cost center"]},
  {label:"Period Close",path:"/erp/period-close/",keywords:["tutup buku","period close"]},
  {label:"Command Center",path:"/",keywords:["beranda","command center","dashboard","utama"]},
@@ -90,7 +92,7 @@ function makeReply(text:string,path:string){
   if(/buka|pergi|masuk|tampilkan|menuju|navigasi/.test(q))return "Baik, saya membuka "+route.label+".";
   return route.label+". "+(route.path==="/master-data/"?"Di sini Anda mengelola organisasi, proyek, pegawai, dan aset.":route.path==="/operations/"?"Di sini Anda mengelola pekerjaan engineering dan alur persetujuan.":"Gunakan menu ini untuk membuka workspace "+route.label+".");
  }
- if(/data contoh|25 data|data demo/.test(q))return "Buka Master Data, lalu tekan Muat 25 data contoh. NUSA akan menyiapkan 5 proyek, 10 pegawai, dan 10 aset sintetis pada organisasi yang dipilih atau membuat organisasi demo jika belum ada.";
+ if(/data contoh|25 data|data demo/.test(q))return "Buka Master Data, lalu tekan Muat 25 data contoh. NUSA akan menyiapkan 5 proyek, 10 pegawai, 10 aset, serta contoh transaksi ERP/Finance dan payroll sintetis pada organisasi aktif atau organisasi demo baru.";
  if(/organisasi|tenant/.test(q))return "Organisasi adalah batas utama data NUSA. Buat atau pilih organisasi terlebih dahulu; proyek, pegawai, dan aset harus berada dalam organisasi yang sama.";
  if(/terima kasih|makasih/.test(q))return "Sama-sama. Saya siap membantu Anda.";
  return "Saya menangkap: "+text+". Untuk saat ini saya dapat membantu navigasi NUSA dan panduan menu. Untuk analisis substantif atau tindakan yang mengubah data, gunakan modul terkait dan ikuti kontrol akses serta persetujuan yang berlaku.";
