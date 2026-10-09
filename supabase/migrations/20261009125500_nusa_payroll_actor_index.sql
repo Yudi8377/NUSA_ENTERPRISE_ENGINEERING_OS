@@ -1,0 +1,1 @@
+create index if not exists idx_nusa_payroll_events_actor_id on public.nusa_payroll_events(actor_id) where actor_id is not null;

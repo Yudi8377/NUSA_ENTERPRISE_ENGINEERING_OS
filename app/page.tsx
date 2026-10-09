@@ -10,7 +10,7 @@ import { retrieveKnowledge } from "../lib/knowledge";
 import { approvals, engineeringRuns, ingestionJobs } from "../lib/operations";
 
 const modules = [
-  ["Command Center", Command, "/"],["Master Data", Building2, "/master-data/"],["AURA Integration", Activity, "/aura/"],["Projects & Construction", Building2, "/projects/"],["Engineering & SAP2000", Activity, "/operations/"],
+  ["Command Center", Command, "/"],["Enterprise Blueprint", FileText, "/system-blueprint/"],["Master Data", Building2, "/master-data/"],["AURA Integration", Activity, "/aura/"],["Projects & Construction", Building2, "/projects/"],["Engineering & SAP2000", Activity, "/operations/"],
   ["Architecture / CAD / BIM", Layers3, "/architecture/"],["ERP & Finance", CircleDollarSign, "/erp/"],["CRM", Users, "/crm/"],
   ["HRD & Payroll", Users, "/hr/"],["Procurement & Asset", ClipboardCheck, "/procurement/"],["Reports & Forecast", BarChart3, "/reports/"],["GRC & Compliance", ShieldCheck, "/grc/"],
 ] as const;

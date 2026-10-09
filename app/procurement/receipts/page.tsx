@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="receipts" title="Goods Receipt & Quality Check" eyebrow="SUPPLY CHAIN / RECEIVING CONTROL" description="Catat penerimaan barang terhadap PO, kuantitas diterima, batch/lot, gudang tujuan, dan hasil pemeriksaan kualitas. Posting stok dan nilai persediaan tetap memerlukan transaksi terkontrol." recordType="procurement_receipt" recordLabel="Penerimaan barang"/>}

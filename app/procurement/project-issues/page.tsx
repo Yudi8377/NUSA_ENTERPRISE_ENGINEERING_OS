@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="issues" title="Project Material Issue" eyebrow="SUPPLY CHAIN / PROJECT MATERIAL CONTROL" description="Catat pengeluaran material dari gudang ke proyek, penerima, work package, dan tanggal serah terima. Integrasi biaya proyek dan mutasi stok otomatis masih memerlukan posting terkontrol." recordType="procurement_project_issue" recordLabel="Pengeluaran material proyek"/>}

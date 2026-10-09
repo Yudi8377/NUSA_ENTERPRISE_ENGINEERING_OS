@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="movements" title="Stock Movement Register" eyebrow="SUPPLY CHAIN / STOCK MOVEMENT" description="Catat penerimaan, pengeluaran, transfer antar gudang, retur, dan penyesuaian dengan referensi dokumen. Register ini belum memutasi saldo buku secara otomatis." recordType="procurement_movement" recordLabel="Pergerakan stok"/>}
