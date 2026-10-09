@@ -119,7 +119,9 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
  const [newTitle,setNewTitle]=useState("");
  const [newDescription,setNewDescription]=useState("");
  const [newAmount,setNewAmount]=useState("");
- const [fieldValues,setFieldValues]=useState<Record<string,string>>({});\n const [editingId,setEditingId]=useState("");\n const [detailRow,setDetailRow]=useState<RecordRow|null>(null);
+ const [fieldValues,setFieldValues]=useState<Record<string,string>>({});
+ const [editingId,setEditingId]=useState("");
+ const [detailRow,setDetailRow]=useState<RecordRow|null>(null);
  const [loading,setLoading]=useState(true);
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState("");
