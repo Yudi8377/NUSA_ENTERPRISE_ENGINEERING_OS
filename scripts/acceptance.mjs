@@ -132,7 +132,7 @@ assert(engineeringUi.includes("human approval"), "engineering high/critical revi
 assert(architecturePage.includes("/architecture/cad-drawings/") && architecturePage.includes("/architecture/bim-coordination/"), "architecture cards must link to dedicated workspaces");
 assert(operationsPageLive.includes("/operations/structural-analysis/") && operationsPageLive.includes("/operations/geotechnical/"), "operations page must expose dedicated discipline submenus");
 for (const route of ["leads","contacts","quotations","activities"]) assert(read("app/crm/"+route+"/page.tsx").includes('section="'+route+'"'), "CRM route missing: "+route);
-for (const route of ["recruitment","attendance","training","payroll"]) assert(read("app/hr/"+route+"/page.tsx").includes('section="'+route+'"'), "HR route missing: "+route);
+for (const route of ["recruitment","attendance","training"]) assert(read("app/hr/"+route+"/page.tsx").includes('section="'+route+'"'), "HR route missing: "+route);
 for (const route of ["requests","vendors","orders","inventory"]) assert(read("app/procurement/"+route+"/page.tsx").includes('section="'+route+'"'), "Procurement route missing: "+route);
 for (const route of ["kpi","forecast","packs","scenarios"]) assert(read("app/reports/"+route+"/page.tsx").includes('section="'+route+'"'), "Reports route missing: "+route);
 for (const route of ["risks","audit","compliance","incidents"]) assert(read("app/grc/"+route+"/page.tsx").includes('section="'+route+'"'), "GRC route missing: "+route);
@@ -152,4 +152,19 @@ assert(workspaceUi.includes("function startEdit(row:RecordRow)"), "enterprise wo
 assert(workspaceUi.includes("setDetailRow(row)"), "enterprise workspace detail view missing");
 assert(workspaceUi.includes("Cetak / PDF"), "enterprise workspace print action missing");
 assert(workspaceUi.includes("updateStatus(row,\"archived\")"), "enterprise workspace archive action missing");
+
+const blueprint = read("docs/ENTERPRISE_MANAGEMENT_BLUEPRINT.md");
+const payrollSchema = read("supabase/migrations/20261009190000_nusa_restricted_payroll.sql");
+const payrollUi = read("components/PayrollWorkspace.tsx");
+assert(blueprint.includes("three-way match") && blueprint.includes("Business continuity") && blueprint.includes("ISO 19650"), "enterprise blueprint lacks cross-functional controls or standards mapping");
+assert(read("app/system-blueprint/page.tsx").includes("/procurement/"), "enterprise blueprint route missing supply-chain links");
+assert(workspaceUi.includes("const activeRecordType=recordType;") && workspaceUi.includes('recordQuery=recordQuery.eq("record_type",activeRecordType)'), "workspace registers must isolate each submenu by its record type");
+for (const route of ["warehouses","receipts","movements","stock-counts","project-issues"]) assert(read("app/procurement/"+route+"/page.tsx").includes('moduleCode="procurement"'), "warehouse workflow route missing: "+route);
+assert(payrollUi.includes('nusa_payroll_runs') && payrollUi.includes('nusa_payroll_lines'), "payroll UI must use dedicated restricted payroll tables");
+assert(payrollUi.includes('approved_overtime_hours') && payrollUi.includes('sick_leave_days') && payrollUi.includes('unpaid_leave_days'), "payroll must consume approved attendance and leave fields");
+assert(payrollUi.includes('bpjs_health_employee') && payrollUi.includes('bpjs_employment_employee') && payrollUi.includes('pph21') && payrollUi.includes('thr'), "payroll components missing");
+assert(payrollSchema.includes("alter table public.nusa_payroll_runs enable row level security") && payrollSchema.includes("alter table public.nusa_payroll_lines enable row level security"), "payroll RLS must be enabled");
+assert(payrollSchema.includes("approved_by <> prepared_by") && payrollSchema.includes("Independent finance approver role required"), "payroll must prevent self-approval");
+assert(payrollSchema.includes("nusa_workspace_records(id)"), "payroll line must preserve attendance source evidence");
+
 console.log("NUSA operational acceptance static assertions: PASS");
