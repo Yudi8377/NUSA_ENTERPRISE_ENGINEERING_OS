@@ -80,4 +80,4 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
   <div style={{marginTop:18,padding:14,border:"1px solid #29463a",borderRadius:12,display:"flex",gap:10,alignItems:"start"}}><ShieldCheck size={17}/><div className="muted" style={{fontSize:11,lineHeight:1.7}}>Akses dibatasi ke tenant yang diikuti. Rekaman terhubung ke proyek pilihan, dan perubahan disimpan pada event trail. Status persetujuan final tidak dapat disetujui melalui dropdown ini.</div></div>
  </div></main>;
 }
-const fieldStyle:React.CSSProperties={display:"block",width:"100%",boxSizing:"border-box",marginTop:6,padding:11,background:"#0b1712",color:"#e7f2eb",border:"1px solid #29463a",borderRadius:9,font:"inherit"};
+
