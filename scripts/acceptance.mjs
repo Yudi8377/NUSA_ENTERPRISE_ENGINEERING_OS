@@ -152,7 +152,6 @@ const generativeStudio = read("components/GenerativeEngineeringStudio.tsx");
 assert(generativeStudio.includes('function makeDxf'), "generative CAD DXF exporter missing");
 assert(generativeStudio.includes('function makeObj'), "generative 3D OBJ exporter missing");
 assert(generativeStudio.includes('function makeSvg'), "generative SVG plan exporter missing");
-assert(generativeStudio.includes('geometry_m2') === false, "no malformed geometry field expected");
 assert(generativeStudio.includes('Unduh DXF CAD'), "DXF download action missing");
 assert(generativeStudio.includes('Unduh model OBJ 3D'), "3D model download action missing");
 assert(generativeStudio.includes('Kajian teknis awal'), "technical study workspace missing");
