@@ -149,7 +149,7 @@ export default function MasterDataPage(){
  }
  async function seedDemoData(){
   if(!userId||seedingDemo||saving)return;
-  if(!window.confirm("Muat tepat 25 data master sintetis: 5 proyek, 10 pegawai, dan 10 aset. NUSA juga akan menyiapkan 25 rekaman ERP/Finance serta 5 kontrol payroll terkait proyek untuk demonstrasi. Jika belum ada organisasi, NUSA akan membuat organisasi demo. Semua data ditandai DEMO; nominal bukan data aktual."))return;
+  if(!window.confirm("Muat 25 data master sintetis: 5 proyek, 10 pegawai, dan 10 aset. NUSA juga menyiapkan 20 rekaman ERP/Finance dan 5 kontrol payroll terkait proyek. Jika tenant ini memiliki sampel lama DEMO-PRJ-06 ke atas, proyek dan transaksi demo terkait akan diarsipkan (bukan dihapus permanen); data non-DEMO tidak diubah. Jika belum ada organisasi, NUSA membuat organisasi demo."))return;
   setSeedingDemo(true);setError("");setNotice("");setSeedStep("Memeriksa organisasi dan sesi pengguna…");
   try{
    let targetTenantId=tenantId;
@@ -178,9 +178,40 @@ export default function MasterDataPage(){
    }
    p=await supabase.from("nusa_projects").select("id,code").eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null);
    if(p.error)throw new Error("Gagal membaca proyek contoh: "+p.error.message);
-   const projectRows=(p.data??[]) as {id:string;code:string}[];
-   if(projectRows.length<5)throw new Error("Belum tersedia 5 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
-   const projectByCode=new Map(projectRows.map(x=>[x.code,x.id]));
+   let projectRows=(p.data??[]) as {id:string;code:string}[];
+   const canonicalCodes=new Set(projectSeed.map(x=>x.code));
+   let canonicalProjectRows=projectRows.filter(x=>canonicalCodes.has(x.code));
+   if(canonicalProjectRows.length<5)throw new Error("Belum tersedia 5 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
+   const canonicalProjectByCode=new Map(canonicalProjectRows.map(x=>[x.code,x.id]));
+   const extraDemoProjects=projectRows.filter(x=>/^DEMO-PRJ-\\d+$/.test(x.code)&&!canonicalCodes.has(x.code));
+   if(extraDemoProjects.length){
+    setSeedStep("Menormalkan sampel lama: mengarsipkan proyek demo tambahan tanpa menghapus permanen…");
+    const extraIds=extraDemoProjects.map(x=>x.id), now=new Date().toISOString();
+    const oldEmployees=await supabase.from("nusa_employees").select("id,employee_code").eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").in("project_id",extraIds).is("archived_at",null);
+    if(oldEmployees.error)throw new Error("Gagal memeriksa relasi pegawai demo lama: "+oldEmployees.error.message);
+    for(const employee of oldEmployees.data??[]){
+     const index=Math.max(0,Number(String(employee.employee_code).match(/(\\d+)$/)?.[1]??1)-1)%canonicalProjectRows.length;
+     const moved=await supabase.from("nusa_employees").update({project_id:canonicalProjectRows[index].id,updated_by:userId}).eq("tenant_id",targetTenantId).eq("id",employee.id);
+     if(moved.error)throw new Error("Gagal merapikan relasi pegawai demo: "+moved.error.message);
+    }
+    const oldAssets=await supabase.from("nusa_assets").select("id,asset_code").eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").in("project_id",extraIds).is("archived_at",null);
+    if(oldAssets.error)throw new Error("Gagal memeriksa relasi aset demo lama: "+oldAssets.error.message);
+    for(const asset of oldAssets.data??[]){
+     const index=Math.max(0,Number(String(asset.asset_code).match(/(\\d+)$/)?.[1]??1)-1)%canonicalProjectRows.length;
+     const moved=await supabase.from("nusa_assets").update({project_id:canonicalProjectRows[index].id,updated_by:userId}).eq("tenant_id",targetTenantId).eq("id",asset.id);
+     if(moved.error)throw new Error("Gagal merapikan relasi aset demo: "+moved.error.message);
+    }
+    const archivedRecords=await supabase.from("nusa_workspace_records").update({archived_at:now,updated_by:userId}).eq("tenant_id",targetTenantId).in("project_id",extraIds).like("record_code","DEMO-%").is("archived_at",null);
+    if(archivedRecords.error)throw new Error("Gagal mengarsipkan transaksi demo lama: "+archivedRecords.error.message);
+    const archivedProjects=await supabase.from("nusa_projects").update({deleted_at:now}).eq("tenant_id",targetTenantId).in("id",extraIds);
+    if(archivedProjects.error)throw new Error("Gagal mengarsipkan proyek demo tambahan: "+archivedProjects.error.message);
+    p=await supabase.from("nusa_projects").select("id,code").eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null);
+    if(p.error)throw new Error("Gagal memverifikasi proyek demo setelah normalisasi: "+p.error.message);
+    projectRows=(p.data??[]) as {id:string;code:string}[];
+    canonicalProjectRows=projectRows.filter(x=>canonicalCodes.has(x.code));
+   }
+   if(canonicalProjectRows.length!==5)throw new Error("Target portofolio demo harus tepat 5 proyek aktif.");
+   const projectByCode=new Map(canonicalProjectRows.map(x=>[x.code,x.id]));
    setSeedStep("Proyek siap. Menyiapkan 10 pegawai…");
    const employeeSeed=[
     ["DEMO-EMP-01","Andi Pratama","Direktur Operasional"],
@@ -261,10 +292,10 @@ export default function MasterDataPage(){
     supabase.from("nusa_workspace_records").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).in("record_code",demoCodes).is("archived_at",null)
    ]);
    if(pCount.error||eCount.error||aCount.error||wCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, aset, dan ERP/Finance.");
-   if((pCount.count??0)<5||(eCount.count??0)<10||(aCount.count??0)<10||(wCount.count??0)<30)throw new Error("Data demo belum lengkap. Target: 5 proyek, 10 pegawai, 10 aset, 25 rekaman ERP/Finance, dan 5 kontrol payroll. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
+   if((pCount.count??0)!==5||(eCount.count??0)<10||(aCount.count??0)<10||(wCount.count??0)<25)throw new Error("Data demo belum lengkap. Target: 5 proyek, 10 pegawai, 10 aset, 20 rekaman ERP/Finance, dan 5 kontrol payroll. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
    setTab("projects");
    setNotice("SELESAI — "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset contoh terverifikasi (target 25 data master). Tersedia "+wCount.count+" rekaman ERP/Finance dan payroll sintetis. Semua terkait ke organisasi dan relasi proyek/PIC pada tenant yang sama.");
-   setSeedStep("Selesai — 25 data master dan 30 rekaman ERP/Finance + payroll siap.");
+   setSeedStep("Selesai — 25 data master dan 25 rekaman ERP/Finance + payroll siap.");
    await refresh();
   }catch(err){
    setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");
