@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, BrainCircuit, ExternalLink, Smartphone, Monitor, ShieldCheck, Puzzle, Activity, Github, Database, Workflow } from "lucide-react";
+import { ArrowLeft, BrainCircuit, ExternalLink, Smartphone, Monitor, ShieldCheck, Puzzle, Activity, Code2, Database, Workflow } from "lucide-react";
 
 const links = [
-  { title: "AURA Source", detail: "Repository utama dan riwayat perubahan", href: "https://github.com/akvisomr-eng/AURA", icon: Github },
+  { title: "AURA Source", detail: "Repository utama dan riwayat perubahan", href: "https://github.com/akvisomr-eng/AURA", icon: Code2 },
   { title: "AURA Android CI", detail: "Build Android terbaru dan artefak yang tersedia", href: "https://github.com/akvisomr-eng/AURA/actions/workflows/android-build.yml", icon: Smartphone },
   { title: "AURA Windows CI", detail: "Build runtime desktop Windows", href: "https://github.com/akvisomr-eng/AURA/actions/workflows/windows.yml", icon: Monitor },
   { title: "AURA Browser Guardian", detail: "Ekstensi browser di dalam repository AURA", href: "https://github.com/akvisomr-eng/AURA/tree/main/aura-browser-extension", icon: Puzzle },
