@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="hr" section="payroll" title="Payroll Control Center" eyebrow="HR / RESTRICTED PAYROLL CONTROL" description="Catat kontrol periode payroll dan exception. Ini bukan mesin kalkulasi gaji, PPh 21, BPJS, slip gaji, atau pembayaran otomatis." recordType="hr_payroll_control" recordLabel="Kontrol payroll"/>}
