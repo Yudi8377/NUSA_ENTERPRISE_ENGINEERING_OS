@@ -143,4 +143,8 @@ assert(financeUi.includes('async function archiveRecord'), "finance record archi
 assert(financeUi.includes('function startEdit(row:Row)'), "finance record edit action missing");
 assert(financeUi.includes('setDetailRow(r)'), "finance record detail view action missing");
 assert(financeUi.includes('Cetak / PDF'), "finance record print action missing");
+assert(workspaceUi.includes("function startEdit(row:RecordRow)"), "enterprise workspace edit action missing");
+assert(workspaceUi.includes("setDetailRow(row)"), "enterprise workspace detail view missing");
+assert(workspaceUi.includes("Cetak / PDF"), "enterprise workspace print action missing");
+assert(workspaceUi.includes("updateStatus(row,\"archived\")"), "enterprise workspace archive action missing");
 console.log("NUSA operational acceptance static assertions: PASS");
