@@ -155,6 +155,8 @@ assert(workspaceUi.includes("updateStatus(row,\"archived\")"), "enterprise works
 
 const blueprint = read("docs/ENTERPRISE_MANAGEMENT_BLUEPRINT.md");
 const payrollSchema = read("supabase/migrations/20261009122455_nusa_restricted_payroll.sql");
+const compensationSchema = read("supabase/migrations/20261009123000_nusa_employee_compensation.sql");
+const compensationUi = read("components/CompensationWorkspace.tsx");
 const payrollUi = read("components/PayrollWorkspace.tsx");
 assert(blueprint.includes("three-way match") && blueprint.includes("Business continuity") && blueprint.includes("ISO 19650"), "enterprise blueprint lacks cross-functional controls or standards mapping");
 assert(read("app/system-blueprint/page.tsx").includes("/procurement/"), "enterprise blueprint route missing supply-chain links");
@@ -166,5 +168,9 @@ assert(payrollUi.includes('bpjs_health_employee') && payrollUi.includes('bpjs_em
 assert(payrollSchema.includes("alter table public.nusa_payroll_runs enable row level security") && payrollSchema.includes("alter table public.nusa_payroll_lines enable row level security"), "payroll RLS must be enabled");
 assert(payrollSchema.includes("approved_by <> prepared_by") && payrollSchema.includes("Independent finance approver role required"), "payroll must prevent self-approval");
 assert(payrollSchema.includes("nusa_workspace_records(id)"), "payroll line must preserve attendance source evidence");
+assert(compensationSchema.includes("alter table public.nusa_employee_compensation enable row level security") && compensationSchema.includes("Effective compensation periods cannot overlap"), "compensation master needs restricted RLS and non-overlapping effective dates");
+assert(compensationUi.includes("effective_from") && compensationUi.includes("position_allowance") && compensationUi.includes("overtime_rate"), "compensation master fields missing");
+assert(payrollUi.includes("nusa_employee_compensation") && payrollUi.includes("chooseEmployee"), "payroll must preload effective-dated compensation");
+assert(read("app/hr/page.tsx").includes("/hr/compensation/"), "HR hub must link compensation master");
 
 console.log("NUSA operational acceptance static assertions: PASS");
