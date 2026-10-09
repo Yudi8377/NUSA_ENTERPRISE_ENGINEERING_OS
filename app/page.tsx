@@ -106,7 +106,7 @@ export default function Home() {
   const critical=agents.filter(a=>a.risk_level==="critical").length;
   const pendingApprovals=approvalList.filter(a=>a.status==="pending").length;
 
-  return <main className="nusa gridbg">
+  return <main className="nusa nusa-home gridbg">
     <div style={{display:"grid",gridTemplateColumns:open?"272px 1fr":"72px 1fr",minHeight:"100vh"}}>
       <aside className={"glass nusa-sidebar "+(open?"is-open":"is-closed")} style={{padding:18,position:"sticky",top:0,height:"100vh",zIndex:5}}>
         <button onClick={()=>setOpen(!open)} aria-label="Navigasi" style={{background:"none",border:0,color:"white",cursor:"pointer"}}>{open?<PanelLeft/>:<Menu/>}</button>
