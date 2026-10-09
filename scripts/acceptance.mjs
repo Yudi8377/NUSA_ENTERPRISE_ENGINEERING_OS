@@ -16,6 +16,9 @@ const masterPage = read("app/master-data/page.tsx");
 const operationsPage = read("app/operations/page.tsx");
 const approvalDecision = read("supabase/migrations/20261009015000_nusa_atomic_approval_decision.sql");
 const workspaceUi = read("components/EnterpriseWorkspace.tsx");
+const auraPage = read("app/aura/page.tsx");
+const homePage = read("app/page.tsx");
+const masterUi = read("app/master-data/page.tsx");
 
 assert(governance.includes("status text not null default 'queued' check(status in ('queued','running','review','approved','rejected','completed','failed','cancelled'))"), "engineering run status enum missing");
 assert(governance.includes("criticality text not null default 'normal' check(criticality in ('normal','high','critical'))"), "engineering criticality enum missing");
@@ -69,4 +72,12 @@ assert(workspaceUi.includes('titleLabel:"Nama laporan / analisis"'), "Reports co
 assert(workspaceUi.includes('titleLabel:"Nama risiko / temuan / kontrol"'), "GRC contextual form fields missing");
 assert(workspaceUi.includes('schema_version:1'), "workspace contextual data schema version missing");
 assert(workspaceUi.includes('summaryKeys.filter'), "contextual record summary missing");
+assert(auraPage.includes("AURA Integration Hub"), "AURA integration hub page missing");
+assert(auraPage.includes("https://github.com/akvisomr-eng/AURA"), "official AURA source link missing");
+assert(auraPage.includes("tidak berpura-pura bahwa koneksi runtime langsung sudah aktif"), "AURA runtime boundary disclosure missing");
+assert(homePage.includes('["AURA Integration", Activity, "/aura/"]'), "AURA navigation entry missing");
+assert(masterUi.includes('Muat 25 data contoh'), "25-record demo loader action missing");
+assert(masterUi.includes('DEMO-PRJ-05') && masterUi.includes('DEMO-EMP-10') && masterUi.includes('DEMO-AST-10'), "sample master data definitions missing");
+assert(masterUi.includes('created_by:userId,updated_by:userId'), "demo data must preserve authenticated actor audit fields");
+assert(masterUi.includes('NUSA Demo Engineering (DATA CONTOH)'), "empty tenant onboarding demo missing");
 console.log("NUSA operational acceptance static assertions: PASS");
