@@ -108,6 +108,17 @@ for (const route of ["bank-reconciliation","expenses","fixed-assets","cost-cente
 
 assert(financeUi.includes('debit harus sama dengan kredit'), "journal balancing validation missing");
 assert(financeUi.includes('nusa_workspace_records'), "finance records must persist to tenant-scoped storage");
+assert(financeUi.includes('Jurnal Berulang'), "recurring journal module missing");
+assert(financeUi.includes('Batch Pembayaran'), "payment run module missing");
+assert(financeUi.includes('Forecast Arus Kas'), "cash forecast module missing");
+assert(financeUi.includes('Dimensi Keuangan'), "financial dimensions module missing");
+assert(financeUi.includes('Transaksi Antar-Entitas'), "intercompany module missing");
+assert(financeUi.includes('Profitabilitas Proyek'), "project profitability module missing");
+assert(financeUi.includes('monthlyActivity'), "six-month finance activity visualization missing");
+assert(financeUi.includes('FINANCE CONTROL DESK'), "finance quick-action desk missing");
+assert(financeUi.includes('bukan arus kas aktual'), "finance dashboard must distinguish register activity from actual cash flow");
+for (const route of ["recurring-journals","payment-runs","cash-forecast","financial-dimensions","intercompany","project-profitability"]) assert(read("app/erp/"+route+"/page.tsx").includes('FinanceWorkspace'), "finance contextual route missing: "+route);
+
 for (const route of ["chart-of-accounts","journals","general-ledger","cash-bank","receivables","payables","budgets","tax","reports"]) assert(read("app/erp/"+route+"/page.tsx").includes('FinanceWorkspace'), "finance route missing: "+route);
 
 assert(moduleHubUi.includes("Module control center"), "module hub must provide contextual process navigation");
