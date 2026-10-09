@@ -219,7 +219,7 @@ export default function MasterDataPage(){
    if(pCount.error||eCount.error||aCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, dan aset.");
    if((pCount.count??0)<5||(eCount.count??0)<10||(aCount.count??0)<10)throw new Error("Sebagian data contoh belum lengkap. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
    setTab("projects");
-   setNotice("SELESAI — 25 data contoh sintetis terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");\n   setSeedStep("Selesai — 25 rekaman sudah diverifikasi.");
+   setNotice("SELESAI — 25 record sintetis (data contoh) terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");\n   setSeedStep("Selesai — 25 rekaman sudah diverifikasi.");
    await refresh();
   }catch(err){
    setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");\n   setSeedStep("Belum selesai — periksa pesan kesalahan lalu coba lagi.");
