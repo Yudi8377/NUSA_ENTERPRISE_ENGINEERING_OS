@@ -97,3 +97,6 @@ The code change is committed, but the final live test remains pending until depl
 - Added dedicated \`nusa_payroll_runs\` and \`nusa_payroll_lines\` tables with RLS role restrictions and a separate payroll worksheet. Payroll is linked to active employee master records and verified attendance records; overtime gross arithmetic is transparent. PPh 21 and BPJS inputs still require validation against current rules. This is not yet a certified/statutory payroll engine.
 - Payroll access depends on membership role codes \`owner\`, \`admin\`, \`hr_manager\`, \`payroll_manager\`, \`payroll\`, \`finance_manager\`, or \`finance\`. Verify role assignment through an authorized admin process before pilot.
 - The latest automated gates must pass on this branch before deployment. Even after they pass, overall production state remains AMBER until signed-in E2E verifies role restrictions, attendance-to-payroll linkage, independent approval, payment evidence, tenant isolation, backup/restore and transaction integrity.
+
+
+- Compensation master is stored in `nusa_employee_compensation` with effective dates and restricted role-based RLS. Payroll run/line changes are captured in `nusa_payroll_events`; audit access is restricted to payroll-authorized roles. Payroll foreign-key indexes were added after checking Supabase Performance Advisor findings.
