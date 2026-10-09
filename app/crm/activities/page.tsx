@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="crm" section="activities" title="Customer Activities" eyebrow="CRM / CUSTOMER ENGAGEMENT" description="Catat panggilan, rapat, site visit, demo, hasil interaksi, PIC, dan tindak lanjut pelanggan." recordType="crm_activity" recordLabel="Aktivitas pelanggan"/>}
