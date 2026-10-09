@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="hr" section="recruitment" title="Workforce Planning & Recruitment" eyebrow="HR / TALENT ACQUISITION" description="Catat requisition tenaga kerja, departemen, jenis hubungan kerja, jumlah kebutuhan, dan target mulai." recordType="hr_requisition" recordLabel="Requisition rekrutmen"/>}
