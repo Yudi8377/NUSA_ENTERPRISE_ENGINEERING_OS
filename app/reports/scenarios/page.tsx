@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="reports" section="scenarios" title="Decision Scenarios" eyebrow="REPORTS / DECISION SUPPORT" description="Catat alternatif keputusan, pemilik, target keputusan, dampak jadwal/biaya, risiko, dan opsi pilihan." recordType="report_scenario" recordLabel="Skenario keputusan"/>}
