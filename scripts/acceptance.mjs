@@ -19,6 +19,8 @@ const workspaceUi = read("components/EnterpriseWorkspace.tsx");
 const auraPage = read("app/aura/page.tsx");
 const homePage = read("app/page.tsx");
 const masterUi = read("app/master-data/page.tsx");
+const auraAvatar = read("components/AuraVoiceAvatar.tsx");
+const layout = read("app/layout.tsx");
 
 assert(governance.includes("status text not null default 'queued' check(status in ('queued','running','review','approved','rejected','completed','failed','cancelled'))"), "engineering run status enum missing");
 assert(governance.includes("criticality text not null default 'normal' check(criticality in ('normal','high','critical'))"), "engineering criticality enum missing");

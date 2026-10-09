@@ -2,7 +2,7 @@
 
 ## Integration status
 
-- NUSA exposes the AURA Integration Hub at /aura/ and includes it in the Command Center navigation.
+- NUSA exposes the AURA Integration Hub at /aura/ and includes it in the Command Center navigation.\n- AURA also appears as a floating, animated voice avatar on all NUSA routes. It supports Indonesian browser speech recognition and speech synthesis where the browser/device provides those capabilities, a text fallback, contextual menu guidance, and simple voice navigation commands. This is an embedded avatar interface, not a table or form.\n- The browser avatar is a lightweight navigation/help interface. It is not yet a live connection to the native AURA Android/Windows cognitive runtime or a remote LLM agent; the native bridge remains a separate, security-gated integration.
 - The hub links to the official AURA source and its Android and Windows GitHub Actions workflows.
 - AURA's repository contains native Android and JVM desktop runtimes plus a browser extension. The NUSA GitHub Pages app is a static web client; it cannot execute the native AURA runtime inside the browser tab.
 - A live device-to-NUSA bridge is **not yet connected**. Before enabling it, implement a signed/authenticated API or local device bridge, tenant-scoped authorization, replay protection, payload validation, audit events, and human approval gates for consequential actions.
@@ -10,7 +10,7 @@
 
 ## Sample master data
 
-From **Master Data → Muat 25 data contoh**, an authenticated user can load clearly labelled synthetic records into the selected tenant. If no tenant exists, the action creates a tenant named "NUSA Demo Engineering (DATA CONTOH)" first.
+From **Master Data → Muat 25 data contoh**, an authenticated user can load clearly labelled synthetic records into the selected tenant. If no tenant exists, the action creates a tenant named "NUSA Demo Engineering (DATA CONTOH)" first. The button now displays progress and verifies the final counts of 5 projects, 10 employees, and 10 assets before reporting completion.
 
 The sample batch contains 25 child records:
 - 5 projects: DEMO-PRJ-01 through DEMO-PRJ-05
