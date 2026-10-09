@@ -132,4 +132,15 @@ for (const route of ["requests","vendors","orders","inventory"]) assert(read("ap
 for (const route of ["kpi","forecast","packs","scenarios"]) assert(read("app/reports/"+route+"/page.tsx").includes('section="'+route+'"'), "Reports route missing: "+route);
 for (const route of ["risks","audit","compliance","incidents"]) assert(read("app/grc/"+route+"/page.tsx").includes('section="'+route+'"'), "GRC route missing: "+route);
 
+const projectDemo = read("app/master-data/page.tsx");
+assert(projectDemo.includes('code:"DEMO-PRJ-10"'), "demo portfolio must include at least ten projects");
+assert(projectDemo.includes('record_code:"DEMO-PAY-"+n'), "demo portfolio must include payroll records");
+assert(projectDemo.includes('record_code:"DEMO-BUD-"+n') && projectDemo.includes('record_code:"DEMO-AR-"+n') && projectDemo.includes('record_code:"DEMO-AP-"+n') && projectDemo.includes('record_code:"DEMO-EXP-"+n'), "demo portfolio must include linked ERP finance registers");
+assert(projectDemo.includes('PROJECT DOSSIER') && projectDemo.includes('openProjectDetail'), "project detail dossier action missing");
+assert(projectDemo.includes('Cetak / PDF') && projectDemo.includes('openMasterDetail'), "master data detail and print actions missing");
+assert(projectDemo.includes('wCount.count??0)<50'), "sample seed must verify all 50 payroll/finance records");
+assert(financeUi.includes('async function archiveRecord'), "finance record archive action missing");
+assert(financeUi.includes('function startEdit(row:Row)'), "finance record edit action missing");
+assert(financeUi.includes('setDetailRow(r)'), "finance record detail view action missing");
+assert(financeUi.includes('Cetak / PDF'), "finance record print action missing");
 console.log("NUSA operational acceptance static assertions: PASS");
