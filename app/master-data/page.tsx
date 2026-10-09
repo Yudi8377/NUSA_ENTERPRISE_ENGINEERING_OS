@@ -42,7 +42,7 @@ export default function MasterDataPage(){
  const [query,setQuery]=useState("");
  const [loading,setLoading]=useState(true);
  const [saving,setSaving]=useState(false);
- const [seedingDemo,setSeedingDemo]=useState(false);
+ const [seedingDemo,setSeedingDemo]=useState(false);\n const [seedStep,setSeedStep]=useState("");
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [newOrgName,setNewOrgName]=useState("");
@@ -136,7 +136,7 @@ export default function MasterDataPage(){
  async function seedDemoData(){
   if(!userId||seedingDemo||saving)return;
   if(!window.confirm("Muat 25 data contoh SINTETIS ke organisasi aktif? Jika belum ada organisasi, NUSA akan membuat tenant bernama NUSA Demo Engineering. Data akan diberi kode DEMO dan dapat diarsipkan seperti data biasa."))return;
-  setSeedingDemo(true);setError("");setNotice("");
+  setSeedingDemo(true);setError("");setNotice("");setSeedStep("Memeriksa organisasi dan sesi pengguna…");
   try{
    let targetTenantId=tenantId;
    if(!targetTenantId){
@@ -146,7 +146,7 @@ export default function MasterDataPage(){
     targetTenantId=created.data.id;
     setTenantId(targetTenantId);
    }
-   const projectSeed=[
+   setSeedStep("Menyiapkan proyek contoh…");\n   const projectSeed=[
     {code:"DEMO-PRJ-01",name:"Gedung Kantor NUSA",category:"building",status:"active",progress:35,budget:12500000000,target_date:"2027-06-30"},
     {code:"DEMO-PRJ-02",name:"Gudang dan Logistik",category:"industrial",status:"active",progress:20,budget:7800000000,target_date:"2027-09-30"},
     {code:"DEMO-PRJ-03",name:"Renovasi Fasilitas",category:"renovation",status:"on_hold",progress:10,budget:1850000000,target_date:"2027-03-31"},
@@ -166,7 +166,7 @@ export default function MasterDataPage(){
    const projectRows=(p.data??[]) as {id:string;code:string}[];
    if(projectRows.length<5)throw new Error("Belum tersedia 5 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
    const projectByCode=new Map(projectRows.map(x=>[x.code,x.id]));
-   const employeeSeed=[
+   setSeedStep("Proyek siap. Menyiapkan 10 pegawai…");\n   const employeeSeed=[
     ["DEMO-EMP-01","Andi Pratama","Direktur Operasional"],
     ["DEMO-EMP-02","Siti Rahmawati","Project Manager"],
     ["DEMO-EMP-03","Bima Santoso","Site Engineer"],
@@ -191,7 +191,7 @@ export default function MasterDataPage(){
    const employeeRows=(e.data??[]) as {id:string;employee_code:string}[];
    if(employeeRows.length<10)throw new Error("Belum tersedia 10 pegawai contoh. Periksa izin HR organisasi lalu jalankan lagi.");
    const employeeByCode=new Map(employeeRows.map(x=>[x.employee_code,x.id]));
-   const assetSeed=[
+   setSeedStep("Pegawai siap. Menyiapkan 10 aset…");\n   const assetSeed=[
     ["DEMO-AST-01","Laptop Engineering 01","IT equipment",18500000,"Kantor pusat"],
     ["DEMO-AST-02","Laptop Engineering 02","IT equipment",18500000,"Kantor pusat"],
     ["DEMO-AST-03","Workstation CAD","IT equipment",32500000,"Studio desain"],
@@ -211,7 +211,7 @@ export default function MasterDataPage(){
     const inserted=await supabase.from("nusa_assets").insert(newAssets).select("id,asset_code");
     if(inserted.error)throw new Error("Gagal menambah aset contoh: "+inserted.error.message);
    }
-   const [pCount,eCount,aCount]=await Promise.all([
+   setSeedStep("Memverifikasi 25 rekaman dan relasinya…");\n   const [pCount,eCount,aCount]=await Promise.all([
     supabase.from("nusa_projects").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null),
     supabase.from("nusa_employees").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null),
     supabase.from("nusa_assets").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null)
@@ -219,10 +219,10 @@ export default function MasterDataPage(){
    if(pCount.error||eCount.error||aCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, dan aset.");
    if((pCount.count??0)<5||(eCount.count??0)<10||(aCount.count??0)<10)throw new Error("Sebagian data contoh belum lengkap. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
    setTab("projects");
-   setNotice("Data contoh siap: 5 proyek + 10 pegawai + 10 aset = 25 record sintetis. Organisasi dan semua relasi mengikuti tenant yang dipilih; proses dapat dijalankan ulang tanpa menggandakan kode DEMO.");
+   setNotice("SELESAI — 25 data contoh sintetis terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");\n   setSeedStep("Selesai — 25 rekaman sudah diverifikasi.");
    await refresh();
   }catch(err){
-   setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");
+   setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");\n   setSeedStep("Belum selesai — periksa pesan kesalahan lalu coba lagi.");
   }finally{
    setSeedingDemo(false);
   }
@@ -247,7 +247,7 @@ export default function MasterDataPage(){
 
  return <main className="nusa gridbg"><div style={{minHeight:"100vh",padding:"24px",maxWidth:1440,margin:"0 auto"}}>
   <Link href="/" style={{display:"inline-flex",gap:8,alignItems:"center",color:"#a9d8b7",textDecoration:"none",fontSize:13}}><ArrowLeft size={16}/> Command Center</Link>
-  <header style={{marginTop:28,display:"flex",justifyContent:"space-between",gap:18,alignItems:"end",flexWrap:"wrap"}}><div><div className="muted" style={{fontSize:11,letterSpacing:".13em"}}>NUSA / DATA GOVERNANCE</div><h1 className="brand" style={{fontSize:40,margin:"8px 0"}}>Master Data</h1><p className="muted" style={{fontSize:14,lineHeight:1.7,maxWidth:760}}>Satu sumber data untuk organisasi, proyek, pegawai, dan aset. Data turunan terhubung ke organisasi aktif dan—bila relevan—ke proyek yang sama.</p></div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{userId&&<button onClick={()=>void seedDemoData()} disabled={seedingDemo||saving||loading} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #426c54",cursor:seedingDemo?"wait":"pointer",opacity:seedingDemo||saving||loading?0.65:1}}><Sparkles size={15}/>{seedingDemo?"Memuat 25 data…":"Muat 25 data contoh"}</button>}<button onClick={()=>void refresh()} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #29463a",cursor:"pointer"}}><RefreshCw size={15}/> Muat ulang</button></div></header>
+  <header style={{marginTop:28,display:"flex",justifyContent:"space-between",gap:18,alignItems:"end",flexWrap:"wrap"}}><div><div className="muted" style={{fontSize:11,letterSpacing:".13em"}}>NUSA / DATA GOVERNANCE</div><h1 className="brand" style={{fontSize:40,margin:"8px 0"}}>Master Data</h1><p className="muted" style={{fontSize:14,lineHeight:1.7,maxWidth:760}}>Satu sumber data untuk organisasi, proyek, pegawai, dan aset. Data turunan terhubung ke organisasi aktif dan—bila relevan—ke proyek yang sama.</p></div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{userId&&<button onClick={()=>void seedDemoData()} disabled={seedingDemo||saving||loading} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #426c54",cursor:seedingDemo?"wait":"pointer",opacity:seedingDemo||saving||loading?0.65:1}}><Sparkles size={15}/>{seedingDemo?(seedStep||"Memuat 25 data…"):"Muat 25 data contoh"}</button>}<button onClick={()=>void refresh()} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #29463a",cursor:"pointer"}}><RefreshCw size={15}/> Muat ulang</button></div></header>
   {!userId?<section className="glass" style={{marginTop:24,padding:24,borderRadius:16}}><h2>Masuk diperlukan</h2><p className="muted">Masuk melalui Command Center untuk mengelola master data organisasi.</p><Link href="/" style={{color:"#a9d8b7"}}>Kembali ke Command Center →</Link></section>:<>
    <section className="glass" style={{marginTop:18,padding:16,borderRadius:14,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}><div style={{flex:1,minWidth:240}}><div className="muted" style={{fontSize:10,marginBottom:6}}>ORGANISASI AKTIF</div><select aria-label="Organisasi aktif" value={tenantId} onChange={e=>setTenantId(e.target.value)} style={{...fieldStyle,marginTop:0,maxWidth:560}}><option value="">Pilih organisasi</option>{tenants.map(t=><option key={t.id} value={t.id}>{t.name} · {t.code}</option>)}</select></div><div><div className="muted" style={{fontSize:10}}>PROYEK</div><strong style={{fontSize:22}}>{projects.length}</strong></div><div><div className="muted" style={{fontSize:10}}>PEGAWAI AKTIF</div><strong style={{fontSize:22}}>{employees.length}</strong></div><div><div className="muted" style={{fontSize:10}}>ASET AKTIF</div><strong style={{fontSize:22}}>{assets.length}</strong></div></section>
    <nav aria-label="Jenis master data" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10,marginTop:14}}>{tabs.map(t=>{const Icon=t.icon;return <button key={t.id} onClick={()=>setTab(t.id)} aria-pressed={tab===t.id} className="glass" style={{textAlign:"left",padding:15,borderRadius:12,border:tab===t.id?"1px solid #8ed8a6":"1px solid #29463a",background:tab===t.id?"rgba(42,105,72,.22)":"rgba(13,28,23,.78)",color:"#e7f2eb",cursor:"pointer"}}><div style={{display:"flex",gap:9,alignItems:"center"}}><Icon size={18}/><b>{t.label}</b></div><div className="muted" style={{fontSize:11,marginTop:8}}>{t.description}</div></button>})}</nav>
