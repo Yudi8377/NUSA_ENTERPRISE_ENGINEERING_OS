@@ -50,3 +50,11 @@
 .aura-voice-quick-actions button{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 7px;min-width:0;border:1px solid #29463a;border-radius:10px;background:rgba(12,35,23,.84);color:#cdebd6;font-size:10px;cursor:pointer}
 .aura-voice-quick-actions button:hover{border-color:#8ed8a6;background:#153b28}
 @media(prefers-reduced-motion:reduce){.aura-voice-orb,.aura-voice-orb:before,.aura-voice-orb:after,.aura-voice-orb>i{animation:none!important}}
+
+/* Finance workspace: keep dense accounting screens readable without horizontal page overflow. */
+.finance-intelligence-grid,.finance-record-layout{min-width:0}
+.finance-intelligence-grid>*,.finance-record-layout>*{min-width:0}
+.finance-intelligence-grid a:hover,.finance-record-layout button:hover,.finance-record-layout a:hover{border-color:#8fcba3!important}
+.finance-record-layout button:focus-visible,.finance-record-layout a:focus-visible,.finance-record-layout input:focus-visible,.finance-record-layout select:focus-visible,.finance-record-layout textarea:focus-visible{outline:2px solid #b7edc5;outline-offset:2px}
+@media(max-width:960px){.finance-intelligence-grid{grid-template-columns:1fr!important}.finance-record-layout{grid-template-columns:minmax(0,1fr)!important}}
+@media(max-width:640px){.finance-intelligence-grid{gap:10px!important}.finance-record-layout{gap:10px!important}.finance-record-layout>section{padding:14px!important}.finance-record-layout table{font-size:11px!important}.finance-record-layout th,.finance-record-layout td{padding:8px 6px!important}}
