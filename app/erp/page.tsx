@@ -1,2 +1,2 @@
-import EnterpriseWorkspace from "../../components/EnterpriseWorkspace";
-export default function Page(){return <EnterpriseWorkspace moduleCode="erp" title="ERP & Finance" eyebrow="NUSA / ERP & FINANCE" description="Jurnal operasional, komitmen biaya, dokumen keuangan, anggaran, dan tindak lanjut. Modul ini mengelola rekaman kerja; bukan pengganti proses closing dan persetujuan akuntansi." recordType="finance_item" recordLabel="Rekaman keuangan"/>}
+import FinanceWorkspace from "../../components/FinanceWorkspace";
+export default function Page(){return <FinanceWorkspace/>}
