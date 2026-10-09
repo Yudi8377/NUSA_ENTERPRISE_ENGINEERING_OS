@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 
 export async function currentUser(){ const {data}=await supabase.auth.getUser(); return data.user ?? null; }
-export async function myTenants(){ return supabase.from("nusa_tenants").select("id,name,code,status").order("created_at",{ascending:true}); }
+export async function myTenants(){ return supabase.from("nusa_tenants").select("id,name,code,status,legal_name,industry,tax_id,address,city,phone,contact_email,website,created_at,updated_at").order("created_at",{ascending:true}); }
 export async function projects(tenantId:string){ return supabase.from("nusa_projects").select("id,code,name,category,status,progress,budget,target_date").eq("tenant_id",tenantId).is("deleted_at",null).order("updated_at",{ascending:false}); }
 export async function agentFleet(){ return supabase.from("nusa_agents").select("code,name,domain,status,risk_level,requires_approval").order("domain",{ascending:true}); }
 
