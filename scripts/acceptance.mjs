@@ -140,6 +140,8 @@ for (const route of ["risks","audit","compliance","incidents"]) assert(read("app
 const projectDemo = read("app/master-data/page.tsx");
 assert(projectDemo.includes('code:"DEMO-PRJ-05"') && !projectDemo.includes('code:"DEMO-PRJ-06"'), "master-data demo must contain exactly five project templates");
 assert(projectDemo.includes('record_code:"DEMO-PAY-"+n'), "demo portfolio must include payroll records");
+assert(projectDemo.includes('record_type:"hr_attendance"') && projectDemo.includes('attendance_status:"Terverifikasi"'), "demo attendance records must be seeded as verified");
+assert(projectDemo.includes('nusa_employee_compensation') && projectDemo.includes('nusa_payroll_lines') && projectDemo.includes('payroll_run'), "demo payroll must include restricted compensation and payroll run data");
 assert(projectDemo.includes('record_code:"DEMO-BUD-"+n') && projectDemo.includes('record_code:"DEMO-AR-"+n') && projectDemo.includes('record_code:"DEMO-AP-"+n') && projectDemo.includes('record_code:"DEMO-EXP-"+n'), "demo portfolio must include linked ERP finance registers");
 assert(projectDemo.includes('PROJECT DOSSIER') && projectDemo.includes('openProjectDetail'), "project detail dossier action missing");
 assert(projectDemo.includes('Cetak / PDF') && projectDemo.includes('openMasterDetail'), "master data detail and print actions missing");
