@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="orders" title="Purchase Order & Contract Draft" eyebrow="PROCUREMENT / COMMERCIAL COMMITMENT" description="Siapkan draf PO dengan vendor, referensi PR, tanggal pengiriman, nilai, dan termin. Simpan tidak menerbitkan komitmen otomatis." recordType="procurement_order" recordLabel="Draf PO"/>}

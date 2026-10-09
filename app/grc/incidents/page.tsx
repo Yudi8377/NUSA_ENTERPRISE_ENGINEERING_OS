@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="grc" section="incidents" title="Incident & Near Miss" eyebrow="GRC / INCIDENT MANAGEMENT" description="Catat fakta insiden, lokasi, severity, tindakan segera, dan status investigasi. Jangan menetapkan akar penyebab sebelum investigasi." recordType="grc_incident" recordLabel="Insiden"/>}

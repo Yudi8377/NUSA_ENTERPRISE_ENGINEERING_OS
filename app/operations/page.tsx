@@ -86,6 +86,9 @@ export default function OperationsPage(){
 
  return <main className="nusa gridbg nusa-ops"><section className="ops-shell">
   <header className="ops-header"><Link href="/" aria-label="Kembali ke NUSA Command Center" className="command-center-button"><ArrowLeft size={15}/> Command Center</Link><div className="ops-eyebrow">NUSA ENGINEERING CONTROL PLANE</div><h1 className="brand ops-title">Operations Studio</h1><p className="muted">Buat workflow engineering yang terikat ke organisasi dan proyek. Run berisiko tinggi tetap membutuhkan persetujuan manusia.</p></header>
+  <nav className="glass ops-card" aria-label="Engineering submenus" style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:16}}>
+   {[["Structural / SAP2000","/operations/structural-analysis/"],["Geotechnical & Foundation","/operations/geotechnical/"],["SAP2000 Model Review","/operations/sap2000-model/"],["MEP Coordination","/operations/mep-coordination/"],["Quantity Surveying","/operations/quantity-surveying/"],["Site Inspection","/operations/site-inspection/"],["CAD / BIM","/architecture/"]].map(([label,href])=><Link key={href} href={href} style={{fontSize:11,textDecoration:"none",padding:"8px 10px",border:"1px solid #29463a",borderRadius:8,color:"#c9ded1"}}>{label} ↗</Link>)}
+  </nav>
   {tenantList.length>0&&<div className="glass ops-card" style={{marginBottom:16,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
    <label>Organisasi<select value={tenantId} onChange={e=>{setTenantId(e.target.value);setProjectId("");}}><option value="">Pilih organisasi</option>{tenantList.map(t=><option key={t.id} value={t.id}>{t.name}{t.code?" · "+t.code:""}</option>)}</select></label>
    <label>Proyek terkait<select value={projectId} onChange={e=>setProjectId(e.target.value)}><option value="">Tanpa proyek spesifik</option>{projectList.map(p=><option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}</select></label>

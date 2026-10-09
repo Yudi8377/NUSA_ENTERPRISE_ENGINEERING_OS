@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="reports" section="kpi" title="KPI Dictionary" eyebrow="REPORTS / KPI GOVERNANCE" description="Definisikan kode KPI, satuan, target, frekuensi, pemilik, dan sumber data sebelum angka ditampilkan sebagai indikator resmi." recordType="report_kpi" recordLabel="Definisi KPI"/>}

@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="crm" section="quotations" title="Quotation & Commercial Offer" eyebrow="CRM / COMMERCIAL" description="Catat draf penawaran, validitas, termin pembayaran, dan status review internal. Penawaran belum menjadi kontrak atau invoice." recordType="crm_quotation" recordLabel="Penawaran"/>}

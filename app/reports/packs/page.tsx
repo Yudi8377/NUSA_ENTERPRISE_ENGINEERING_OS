@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="reports" section="packs" title="Report Packs & Distribution" eyebrow="REPORTS / DISTRIBUTION" description="Rencanakan paket laporan, periode, penerima, format, dan klasifikasi kerahasiaan." recordType="report_pack" recordLabel="Paket laporan"/>}

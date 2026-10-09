@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="requests" title="Purchase Requisition" eyebrow="PROCUREMENT / REQUISITION" description="Formulir permintaan material atau jasa dengan kategori, kuantitas, satuan, spesifikasi, tanggal kebutuhan, dan estimasi." recordType="procurement_requisition" recordLabel="Purchase requisition"/>}

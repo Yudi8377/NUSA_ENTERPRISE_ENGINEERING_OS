@@ -22,6 +22,11 @@ const homePage = read("app/page.tsx");
 const masterUi = read("app/master-data/page.tsx");
 const auraAvatar = read("components/AuraVoiceAvatar.tsx");
 const layout = read("app/layout.tsx");
+const engineeringUi = read("components/EngineeringDisciplineWorkspace.tsx");
+const moduleHubUi = read("components/EnterpriseModuleHub.tsx");
+const architecturePage = read("app/architecture/page.tsx");
+const operationsPageLive = read("app/operations/page.tsx");
+
 
 assert(governance.includes("status text not null default 'queued' check(status in ('queued','running','review','approved','rejected','completed','failed','cancelled'))"), "engineering run status enum missing");
 assert(governance.includes("criticality text not null default 'normal' check(criticality in ('normal','high','critical'))"), "engineering criticality enum missing");
@@ -104,4 +109,27 @@ for (const route of ["bank-reconciliation","expenses","fixed-assets","cost-cente
 assert(financeUi.includes('debit harus sama dengan kredit'), "journal balancing validation missing");
 assert(financeUi.includes('nusa_workspace_records'), "finance records must persist to tenant-scoped storage");
 for (const route of ["chart-of-accounts","journals","general-ledger","cash-bank","receivables","payables","budgets","tax","reports"]) assert(read("app/erp/"+route+"/page.tsx").includes('FinanceWorkspace'), "finance route missing: "+route);
+
+assert(moduleHubUi.includes("Module control center"), "module hub must provide contextual process navigation");
+assert(auraAvatar.includes('/crm/leads/'), "AURA voice navigation to CRM submodules missing");
+assert(auraAvatar.includes('/operations/structural-analysis/'), "AURA voice navigation to engineering submodules missing");
+assert(auraAvatar.includes('/erp/journals/'), "AURA voice navigation to finance submodules missing");
+
+for (const key of ["leads","contacts","quotations","activities"]) assert(workspaceUi.includes(key+":"), "CRM contextual workflow missing: "+key);
+for (const key of ["recruitment","attendance","training","payroll"]) assert(workspaceUi.includes(key+":"), "HR contextual workflow missing: "+key);
+for (const key of ["requests","vendors","orders","inventory"]) assert(workspaceUi.includes(key+":"), "Procurement contextual workflow missing: "+key);
+for (const key of ["kpi","forecast","packs","scenarios"]) assert(workspaceUi.includes(key+":"), "Reports contextual workflow missing: "+key);
+for (const key of ["risks","audit","compliance","incidents"]) assert(workspaceUi.includes(key+":"), "GRC contextual workflow missing: "+key);
+for (const key of ["structural-analysis","geotechnical","sap2000-model","mep-coordination","quantity-surveying","site-inspection","cad-drawings","bim-coordination","clash-review","design-review","spatial-data"]) assert(engineeringUi.includes('"'+key+'":{'), "Engineering discipline schema missing: "+key);
+assert(engineeringUi.includes("createEngineeringRun"), "discipline forms must create actual engineering workflow records");
+assert(engineeringUi.includes("schema_version:1"), "engineering workflow payload schema version missing");
+assert(engineeringUi.includes("human approval"), "engineering high/critical review disclosure missing");
+assert(architecturePage.includes("/architecture/cad-drawings/") && architecturePage.includes("/architecture/bim-coordination/"), "architecture cards must link to dedicated workspaces");
+assert(operationsPageLive.includes("/operations/structural-analysis/") && operationsPageLive.includes("/operations/geotechnical/"), "operations page must expose dedicated discipline submenus");
+for (const route of ["leads","contacts","quotations","activities"]) assert(read("app/crm/"+route+"/page.tsx").includes('section="'+route+'"'), "CRM route missing: "+route);
+for (const route of ["recruitment","attendance","training","payroll"]) assert(read("app/hr/"+route+"/page.tsx").includes('section="'+route+'"'), "HR route missing: "+route);
+for (const route of ["requests","vendors","orders","inventory"]) assert(read("app/procurement/"+route+"/page.tsx").includes('section="'+route+'"'), "Procurement route missing: "+route);
+for (const route of ["kpi","forecast","packs","scenarios"]) assert(read("app/reports/"+route+"/page.tsx").includes('section="'+route+'"'), "Reports route missing: "+route);
+for (const route of ["risks","audit","compliance","incidents"]) assert(read("app/grc/"+route+"/page.tsx").includes('section="'+route+'"'), "GRC route missing: "+route);
+
 console.log("NUSA operational acceptance static assertions: PASS");

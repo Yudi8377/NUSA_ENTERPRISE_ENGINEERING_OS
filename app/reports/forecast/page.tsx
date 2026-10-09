@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="reports" section="forecast" title="Forecast & Scenario" eyebrow="REPORTS / FORECAST & SCENARIO" description="Catat skenario, horizon, driver, confidence, nilai proyeksi, dan status review. Perhitungan belum disinkronkan otomatis ke semua modul." recordType="report_forecast" recordLabel="Skenario forecast"/>}
