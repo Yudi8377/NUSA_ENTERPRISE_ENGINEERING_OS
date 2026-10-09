@@ -88,3 +88,12 @@ The Supabase Auth dashboard configuration must also be verified manually because
 6. Confirm the resulting browser URL remains on GitHub Pages and the signed-in session is established. If the link still goes to localhost, inspect the actual confirmation email template and Auth URL configuration before retrying.
 
 The code change is committed, but the final live test remains pending until deployment and the Supabase dashboard settings have both been verified.
+
+
+## 2026-10-09 — Enterprise workflow expansion candidate
+
+- Added \`docs/ENTERPRISE_MANAGEMENT_BLUEPRINT.md\` and the \`/system-blueprint/\` route as a target operating model covering ERP/finance, HR/payroll, procurement/warehouse, CRM, project controls, engineering/CAD/BIM/GIS, GRC, records management, reporting and AURA.
+- Added dedicated warehouse routes for warehouse master, goods receipt/QC, stock movement, stock opname and project material issue. They currently create audited workflow/register records; do not treat these as a stock ledger or automatic valuation/GL posting.
+- Added dedicated \`nusa_payroll_runs\` and \`nusa_payroll_lines\` tables with RLS role restrictions and a separate payroll worksheet. Payroll is linked to active employee master records and verified attendance records; overtime gross arithmetic is transparent. PPh 21 and BPJS inputs still require validation against current rules. This is not yet a certified/statutory payroll engine.
+- Payroll access depends on membership role codes \`owner\`, \`admin\`, \`hr_manager\`, \`payroll_manager\`, \`payroll\`, \`finance_manager\`, or \`finance\`. Verify role assignment through an authorized admin process before pilot.
+- The latest automated gates must pass on this branch before deployment. Even after they pass, overall production state remains AMBER until signed-in E2E verifies role restrictions, attendance-to-payroll linkage, independent approval, payment evidence, tenant isolation, backup/restore and transaction integrity.
