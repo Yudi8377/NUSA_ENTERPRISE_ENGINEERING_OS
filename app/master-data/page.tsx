@@ -91,7 +91,7 @@ export default function MasterDataPage(){
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!userId||!tenantId)return;
   setSaving(true);setError("");setNotice("");
-  let result:any;
+  let result:{error:{message:string}|null}|null=null;
   if(tab==="organization"){
    result=await supabase.from("nusa_tenants").update({
     name:values.name.trim(),legal_name:values.legal_name.trim()||null,industry:values.industry.trim()||null,tax_id:values.tax_id.trim()||null,address:values.address.trim()||null,city:values.city.trim()||null,phone:values.phone.trim()||null,contact_email:values.contact_email.trim()||null,website:values.website.trim()||null,updated_at:new Date().toISOString()
