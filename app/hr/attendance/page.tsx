@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="hr" section="attendance" title="Attendance & Shift Review" eyebrow="HR / TIME & ATTENDANCE" description="Kelola periode timesheet, shift, kode pegawai, koreksi, dan status verifikasi supervisor." recordType="hr_attendance" recordLabel="Catatan kehadiran"/>}
