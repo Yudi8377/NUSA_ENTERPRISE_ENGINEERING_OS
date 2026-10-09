@@ -203,7 +203,7 @@ export default function MasterDataPage(){
     ["DEMO-AST-09","Printer A3","Office equipment",16500000,"Ruang dokumen"],
     ["DEMO-AST-10","Safety Kit Set","HSE equipment",7500000,"Gudang HSE"]
    ];
-   let a=await supabase.from("nusa_assets").select("id,asset_code").eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null);
+   const a=await supabase.from("nusa_assets").select("id,asset_code").eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null);
    if(a.error)throw new Error("Gagal memeriksa aset contoh: "+a.error.message);
    const knownAssetCodes=new Set((a.data??[]).map(x=>x.asset_code));
    const newAssets=assetSeed.filter(x=>!knownAssetCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,asset_code:x[0],name:x[1],category:x[2],condition_status:"good",asset_status:i<3?"assigned":"available",acquisition_date:"2026-01-12",acquisition_cost:x[3],location:x[4],project_id:projectByCode.get(projectSeed[i%5].code)??null,assigned_employee_id:employeeByCode.get(employeeSeed[i%10][0])??null,notes:"DATA CONTOH SINTETIS — nilai dan penempatan hanya untuk uji coba.",created_by:userId,updated_by:userId}));
