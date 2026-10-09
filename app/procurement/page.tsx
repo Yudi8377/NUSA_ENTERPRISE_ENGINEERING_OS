@@ -1,2 +1,2 @@
-import EnterpriseWorkspace from "@/components/EnterpriseWorkspace";
+import EnterpriseWorkspace from "../../components/EnterpriseWorkspace";
 export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" title="Procurement & Asset" eyebrow="NUSA / SUPPLY & ASSET" description="Catat permintaan pembelian, vendor, purchase order, stok, aset, dan pemeliharaan. Persetujuan pengadaan tetap mengikuti delegasi kewenangan." recordType="procurement_item" recordLabel="Rekaman pengadaan"/>}
