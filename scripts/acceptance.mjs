@@ -143,7 +143,7 @@ assert(projectDemo.includes('record_code:"DEMO-PAY-"+n'), "demo portfolio must i
 assert(projectDemo.includes('record_code:"DEMO-BUD-"+n') && projectDemo.includes('record_code:"DEMO-AR-"+n') && projectDemo.includes('record_code:"DEMO-AP-"+n') && projectDemo.includes('record_code:"DEMO-EXP-"+n'), "demo portfolio must include linked ERP finance registers");
 assert(projectDemo.includes('PROJECT DOSSIER') && projectDemo.includes('openProjectDetail'), "project detail dossier action missing");
 assert(projectDemo.includes('Cetak / PDF') && projectDemo.includes('openMasterDetail'), "master data detail and print actions missing");
-assert(projectDemo.includes('wCount.count??0)<30'), "sample seed must verify 25 ERP/Finance and 5 payroll records");
+assert(projectDemo.includes('wCount.count??0)<25'), "sample seed must verify 20 ERP/Finance and 5 payroll records");
 assert(financeUi.includes('async function archiveRecord'), "finance record archive action missing");
 assert(financeUi.includes('function startEdit(row:Row)'), "finance record edit action missing");
 assert(financeUi.includes('setDetailRow(r)'), "finance record detail view action missing");
