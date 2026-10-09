@@ -1,2 +1,2 @@
-import EnterpriseWorkspace from "@/components/EnterpriseWorkspace";
+import EnterpriseWorkspace from "../../components/EnterpriseWorkspace";
 export default function Page(){return <EnterpriseWorkspace moduleCode="reports" title="Reports & Forecast" eyebrow="NUSA / MANAGEMENT INTELLIGENCE" description="Daftarkan kebutuhan laporan, asumsi forecast, isu KPI, dan skenario keputusan. Nilai pada rekaman adalah input kerja, bukan hasil perhitungan EAC/ETC otomatis." recordType="report_request" recordLabel="Permintaan laporan"/>}
