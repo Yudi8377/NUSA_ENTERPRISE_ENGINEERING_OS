@@ -10,6 +10,7 @@ type Tenant = {id:string;name:string;code:string;status:string;legal_name?:strin
 type Project = {id:string;tenant_id:string;code:string;name:string;category:string;status:string;progress:number;budget:number|null;target_date:string|null;deleted_at:string|null;updated_at:string};
 type Employee = {id:string;tenant_id:string;project_id:string|null;employee_code:string;full_name:string;email:string|null;phone:string|null;position_title:string|null;employment_status:string;joined_on:string|null;notes:string|null;updated_at:string};
 type Asset = {id:string;tenant_id:string;project_id:string|null;assigned_employee_id:string|null;asset_code:string;name:string;category:string;condition_status:string;asset_status:string;acquisition_date:string|null;acquisition_cost:number|null;location:string|null;notes:string|null;updated_at:string};
+type MasterEvent = {id:string;entity_table:string;entity_id:string;actor_id:string|null;action:string;created_at:string;after_state:Record<string,unknown>};
 type Tab = "organization"|"projects"|"employees"|"assets";
 type FormValues = Record<string,string>;
 const tabs:{id:Tab;label:string;description:string;icon:typeof Building2}[]=[
@@ -34,7 +35,7 @@ export default function MasterDataPage(){
  const [tenantId,setTenantId]=useState("");
  const [projects,setProjects]=useState<Project[]>([]);
  const [employees,setEmployees]=useState<Employee[]>([]);
- const [assets,setAssets]=useState<Asset[]>([]);
+ const [assets,setAssets]=useState<Asset[]>([]);\n const [events,setEvents]=useState<MasterEvent[]>([]);
  const [values,setValues]=useState<FormValues>({...blank.organization});
  const [editingId,setEditingId]=useState("");
  const [query,setQuery]=useState("");
@@ -49,7 +50,7 @@ export default function MasterDataPage(){
  const refresh=useCallback(async()=>{
    setLoading(true);setError("");
    const u=await currentUser();
-   if(!u){setUserId("");setTenants([]);setProjects([]);setEmployees([]);setAssets([]);setLoading(false);return;}
+   if(!u){setUserId("");setTenants([]);setProjects([]);setEmployees([]);setAssets([]);setEvents([]);setLoading(false);return;}
    setUserId(u.id);
    const t=await myTenants();
    if(t.error){setError(t.error.message);setLoading(false);return;}
@@ -57,7 +58,7 @@ export default function MasterDataPage(){
    setTenants(tenantRows);
    const active=tenantRows.some(x=>x.id===tenantId)?tenantId:(tenantRows[0]?.id??"");
    setTenantId(active);
-   if(!active){setProjects([]);setEmployees([]);setAssets([]);setLoading(false);return;}
+   if(!active){setProjects([]);setEmployees([]);setAssets([]);setEvents([]);setLoading(false);return;}
    const [p,e,a]=await Promise.all([
     supabase.from("nusa_projects").select("id,tenant_id,code,name,category,status,progress,budget,target_date,deleted_at,updated_at").eq("tenant_id",active).is("deleted_at",null).order("updated_at",{ascending:false}),
     supabase.from("nusa_employees").select("id,tenant_id,project_id,employee_code,full_name,email,phone,position_title,employment_status,joined_on,notes,updated_at").eq("tenant_id",active).is("archived_at",null).order("updated_at",{ascending:false}),
