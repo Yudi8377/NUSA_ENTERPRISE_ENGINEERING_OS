@@ -182,22 +182,21 @@ export default function MasterDataPage(){
    const canonicalCodes=new Set(projectSeed.map(x=>x.code));
    let canonicalProjectRows=projectRows.filter(x=>canonicalCodes.has(x.code));
    if(canonicalProjectRows.length<5)throw new Error("Belum tersedia 5 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
-   const canonicalProjectByCode=new Map(canonicalProjectRows.map(x=>[x.code,x.id]));
-   const extraDemoProjects=projectRows.filter(x=>/^DEMO-PRJ-\\d+$/.test(x.code)&&!canonicalCodes.has(x.code));
+   const extraDemoProjects=projectRows.filter(x=>/^DEMO-PRJ-\d+$/.test(x.code)&&!canonicalCodes.has(x.code));
    if(extraDemoProjects.length){
     setSeedStep("Menormalkan sampel lama: mengarsipkan proyek demo tambahan tanpa menghapus permanen…");
     const extraIds=extraDemoProjects.map(x=>x.id), now=new Date().toISOString();
     const oldEmployees=await supabase.from("nusa_employees").select("id,employee_code").eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").in("project_id",extraIds).is("archived_at",null);
     if(oldEmployees.error)throw new Error("Gagal memeriksa relasi pegawai demo lama: "+oldEmployees.error.message);
     for(const employee of oldEmployees.data??[]){
-     const index=Math.max(0,Number(String(employee.employee_code).match(/(\\d+)$/)?.[1]??1)-1)%canonicalProjectRows.length;
+     const index=Math.max(0,Number(String(employee.employee_code).match(/(\d+)$/)?.[1]??1)-1)%canonicalProjectRows.length;
      const moved=await supabase.from("nusa_employees").update({project_id:canonicalProjectRows[index].id,updated_by:userId}).eq("tenant_id",targetTenantId).eq("id",employee.id);
      if(moved.error)throw new Error("Gagal merapikan relasi pegawai demo: "+moved.error.message);
     }
     const oldAssets=await supabase.from("nusa_assets").select("id,asset_code").eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").in("project_id",extraIds).is("archived_at",null);
     if(oldAssets.error)throw new Error("Gagal memeriksa relasi aset demo lama: "+oldAssets.error.message);
     for(const asset of oldAssets.data??[]){
-     const index=Math.max(0,Number(String(asset.asset_code).match(/(\\d+)$/)?.[1]??1)-1)%canonicalProjectRows.length;
+     const index=Math.max(0,Number(String(asset.asset_code).match(/(\d+)$/)?.[1]??1)-1)%canonicalProjectRows.length;
      const moved=await supabase.from("nusa_assets").update({project_id:canonicalProjectRows[index].id,updated_by:userId}).eq("tenant_id",targetTenantId).eq("id",asset.id);
      if(moved.error)throw new Error("Gagal merapikan relasi aset demo: "+moved.error.message);
     }
