@@ -10,7 +10,7 @@ import { retrieveKnowledge } from "../lib/knowledge";
 import { approvals, engineeringRuns, ingestionJobs } from "../lib/operations";
 
 const modules = [
-  ["Command Center", Command, "/"],["Projects & Construction", Building2, "/projects/"],["Engineering & SAP2000", Activity, "/operations/"],
+  ["Command Center", Command, "/"],["Master Data", Building2, "/master-data/"],["Projects & Construction", Building2, "/projects/"],["Engineering & SAP2000", Activity, "/operations/"],
   ["Architecture / CAD / BIM", Layers3, "/architecture/"],["ERP & Finance", CircleDollarSign, "/erp/"],["CRM", Users, "/crm/"],
   ["HRD & Payroll", Users, "/hr/"],["Procurement & Asset", ClipboardCheck, "/procurement/"],["Reports & Forecast", BarChart3, "/reports/"],["GRC & Compliance", ShieldCheck, "/grc/"],
 ] as const;
@@ -120,7 +120,7 @@ export default function Home() {
           <div><div className="muted" style={{fontSize:12}}>NUSA CONTROL PLANE / FREE-FIRST PRODUCTION</div><h1 className="brand" style={{fontSize:30,margin:"5px 0"}}>Enterprise Command Center</h1><div className="muted" style={{fontSize:12}}>Evidence-first · Indonesian-first · Human approval for critical engineering</div></div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             {user?<><span className="muted" style={{fontSize:12}}>{user.email}</span><button onClick={()=>supabase.auth.signOut()} className="glass" style={{padding:"10px 14px",color:"#dcebe4",borderRadius:10,border:0}}>Keluar</button></>:<button onClick={()=>setAuthOpen(true)} style={{background:"#d8f5df",color:"#0b2116",border:0,borderRadius:10,padding:"10px 15px",fontWeight:700,display:"flex",gap:8,alignItems:"center"}}><LogIn size={16}/> Masuk NUSA</button>}
-            <button className="glass" style={{padding:"10px 14px",color:"#dcebe4",borderRadius:10,border:0}}><FileText size={16}/></button>
+            <button onClick={()=>window.print()} title="Cetak Command Center" aria-label="Cetak Command Center" className="glass" style={{padding:"10px 14px",color:"#dcebe4",borderRadius:10,border:0,cursor:"pointer"}}><FileText size={16}/></button>
           </div>
         </header>
 
