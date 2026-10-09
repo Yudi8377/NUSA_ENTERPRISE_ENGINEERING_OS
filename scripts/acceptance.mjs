@@ -92,6 +92,15 @@ assert(financeUi.includes('Utang Usaha'), "finance payables module missing");
 assert(financeUi.includes('Anggaran & Forecast'), "finance budget module missing");
 assert(financeUi.includes('Pajak & Kepatuhan'), "finance tax module missing");
 assert(financeUi.includes('Laporan Keuangan'), "finance reporting module missing");
+assert(financeUi.includes('Rekonsiliasi Bank'), "finance bank reconciliation module missing");
+assert(financeUi.includes('Biaya & Klaim'), "finance expense claims module missing");
+assert(financeUi.includes('Aset Tetap'), "finance fixed assets module missing");
+assert(financeUi.includes('Pusat Biaya'), "finance cost centers module missing");
+assert(financeUi.includes('Tutup Buku'), "finance period close module missing");
+assert(financeUi.includes('Total rekaman'), "finance overview KPI missing");
+assert(financeUi.includes('financeQuery.eq("record_type",c.recordType):financeQuery'), "overview must query all ERP records while module pages are record-type scoped");
+for (const route of ["bank-reconciliation","expenses","fixed-assets","cost-centers","period-close"]) assert(read("app/erp/"+route+"/page.tsx").includes('FinanceWorkspace'), "finance route missing: "+route);
+
 assert(financeUi.includes('debit harus sama dengan kredit'), "journal balancing validation missing");
 assert(financeUi.includes('nusa_workspace_records'), "finance records must persist to tenant-scoped storage");
 for (const route of ["chart-of-accounts","journals","general-ledger","cash-bank","receivables","payables","budgets","tax","reports"]) assert(read("app/erp/"+route+"/page.tsx").includes('FinanceWorkspace'), "finance route missing: "+route);
