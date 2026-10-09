@@ -11,6 +11,7 @@ const operations = read("lib/operations.ts");
 const rls = read("supabase/tests/nusa_rls.sql");
 const smoke = read("scripts/smoke.mjs");
 const master = read("supabase/migrations/20261009012000_nusa_master_data_crud.sql");
+const onboarding = read("supabase/migrations/20261009013000_nusa_create_workspace_rls_fix.sql");
 const masterPage = read("app/master-data/page.tsx");
 
 assert(governance.includes("status text not null default 'queued' check(status in ('queued','running','review','approved','rejected','completed','failed','cancelled'))"), "engineering run status enum missing");
@@ -41,6 +42,9 @@ assert(master.includes("nusa_assets_employee_tenant_fk"), "asset employee tenant
 assert(master.includes("nusa_master_data_events"), "master data audit trail missing");
 assert(master.includes("alter table public.nusa_employees enable row level security"), "employee RLS missing");
 assert(master.includes("alter table public.nusa_assets enable row level security"), "asset RLS missing");
+assert(onboarding.includes("security definer"), "workspace onboarding must safely bypass initial tenant RLS");
+assert(onboarding.includes("(select auth.uid()) is null"), "workspace onboarding must require an authenticated actor");
+assert(onboarding.includes("revoke all on function public.nusa_create_workspace"), "workspace RPC grants must be restricted");
 assert(masterPage.includes("createOrganization"), "organization onboarding action missing");
 assert(masterPage.includes("async function submit"), "master data create/update action missing");
 assert(masterPage.includes("async function archive"), "master data archive action missing");
