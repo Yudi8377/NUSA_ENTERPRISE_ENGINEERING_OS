@@ -43,3 +43,8 @@ CRM/HR/Procurement/Reports/GRC contextual records use the existing tenant-scoped
 - Payroll worksheet links employee master records to attendance records marked `Terverifikasi`. It calculates overtime pay as approved hours × entered rate, gross components, deductions and net estimate. PPh 21 and BPJS values are entered only after external/current-rule verification; this is not yet a legally validated Indonesian payroll engine.
 - Procurement adds dedicated routes for warehouse master, goods receipt/QC, stock movement, stock opname and material issue to project. These are audited registers; automatic stock ledger posting, valuation and GL integration remain a separate acceptance gate.
 - Submenu queries filter by each route's `record_type` to prevent one submenu showing unrelated records from the same module.
+
+
+- Added restricted effective-dated compensation master for base salary, fixed/position allowances and overtime rate; overlapping effective periods for one employee are rejected by the database trigger.
+- Payroll worksheet preloads compensation effective on the payroll period start date, offers only verified attendance records for the selected employee, and snapshots compensation and attendance evidence into the payroll line. It shows a gross/net worksheet, not a final tax calculation.
+- Payroll run and line changes are captured by an append-only, role-restricted payroll event table. The event view is available to users who have the payroll role.
