@@ -105,6 +105,11 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
  const visible=useMemo(()=>rows.filter(row=>[row.title,row.record_type,row.record_code??"",row.status,...config.summaryKeys.map(k=>fieldValue(row.data?.[k]))].join(" ").toLowerCase().includes(query.toLowerCase())),[rows,query,config.summaryKeys]);
  async function addRecord(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(!userId||!tenantId||!newTitle.trim())return;
+  const missing=config.fields.find(field=>field.required&&!(fieldValues[field.key]??"").trim());
+  if(missing){setError("Kolom wajib diisi: "+missing.label+".");return;}
+  if(config.fields.some(field=>field.type==="email"&&(fieldValues[field.key]??"").trim()&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(fieldValues[field.key].trim()))){setError("Periksa format email kontak.");return;}
+  const invalidUrl=config.fields.find(field=>field.type==="url"&&(fieldValues[field.key]??"").trim()&&!/^https?:\\/\\//i.test(fieldValues[field.key].trim()));
+  if(invalidUrl){setError("Tautan "+invalidUrl.label+" harus dimulai dengan https:// atau http://.");return;}
   setSaving(true);setError("");setNotice("");
   const amount=config.showAmount&&newAmount.trim()?Number(newAmount):null;
   if(amount!==null&&(!Number.isFinite(amount)||amount<0)){setError("Nilai harus berupa angka nol atau lebih.");setSaving(false);return;}
