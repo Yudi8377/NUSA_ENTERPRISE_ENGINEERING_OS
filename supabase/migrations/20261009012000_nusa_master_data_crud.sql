@@ -33,6 +33,8 @@ create table if not exists public.nusa_employees (
   constraint nusa_employees_project_tenant_fk foreign key (tenant_id,project_id) references public.nusa_projects(tenant_id,id) on delete set null (project_id)
 );
 
+create unique index if not exists idx_nusa_employees_tenant_id_id on public.nusa_employees(tenant_id,id);
+
 create table if not exists public.nusa_assets (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references public.nusa_tenants(id) on delete cascade,
@@ -83,7 +85,7 @@ with check (exists (select 1 from public.nusa_memberships m where m.tenant_id=nu
 
 drop policy if exists nusa_projects_member_insert on public.nusa_projects;
 create policy nusa_projects_member_insert on public.nusa_projects for insert to authenticated
-with check (created_by = (select auth.uid()) and exists (select 1 from public.nusa_memberships m where m.tenant_id=nusa_projects.tenant_id and m.user_id=(select auth.uid()) and m.role_code in ('owner','admin','project_manager','engineering_lead')));
+with check (exists (select 1 from public.nusa_memberships m where m.tenant_id=nusa_projects.tenant_id and m.user_id=(select auth.uid()) and m.role_code in ('owner','admin','project_manager','engineering_lead')));
 drop policy if exists nusa_projects_member_update on public.nusa_projects;
 create policy nusa_projects_member_update on public.nusa_projects for update to authenticated
 using (exists (select 1 from public.nusa_memberships m where m.tenant_id=nusa_projects.tenant_id and m.user_id=(select auth.uid()) and m.role_code in ('owner','admin','project_manager','engineering_lead')))
@@ -127,12 +129,15 @@ create or replace function public.nusa_capture_master_data_event()
 returns trigger language plpgsql security definer set search_path=pg_catalog,public as $$
 declare v_tenant uuid; v_id uuid;
 begin
-  if tg_op='INSERT' then v_tenant:=new.tenant_id; v_id:=new.id;
+  if tg_op='INSERT' then
+    if tg_table_name='nusa_tenants' then v_tenant:=new.id; else v_tenant:=new.tenant_id; end if;
+    v_id:=new.id;
     insert into public.nusa_master_data_events(tenant_id,entity_table,entity_id,actor_id,action,after_state)
     values(v_tenant,tg_table_name,v_id,(select auth.uid()),'INSERT',to_jsonb(new));
     return new;
   end if;
-  v_tenant:=new.tenant_id; v_id:=new.id;
+  if tg_table_name='nusa_tenants' then v_tenant:=new.id; else v_tenant:=new.tenant_id; end if;
+  v_id:=new.id;
   new.updated_at:=now();
   insert into public.nusa_master_data_events(tenant_id,entity_table,entity_id,actor_id,action,before_state,after_state)
   values(v_tenant,tg_table_name,v_id,(select auth.uid()),'UPDATE',to_jsonb(old),to_jsonb(new));
