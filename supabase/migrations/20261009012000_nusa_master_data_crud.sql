@@ -138,7 +138,7 @@ begin
   end if;
   if tg_table_name='nusa_tenants' then v_tenant:=new.id; else v_tenant:=new.tenant_id; end if;
   v_id:=new.id;
-  new.updated_at:=now();
+  if tg_table_name <> 'nusa_tenants' then new.updated_at:=now(); end if;
   insert into public.nusa_master_data_events(tenant_id,entity_table,entity_id,actor_id,action,before_state,after_state)
   values(v_tenant,tg_table_name,v_id,(select auth.uid()),'UPDATE',to_jsonb(old),to_jsonb(new));
   return new;
@@ -151,4 +151,4 @@ create trigger nusa_employees_master_event before insert or update on public.nus
 drop trigger if exists nusa_assets_master_event on public.nusa_assets;
 create trigger nusa_assets_master_event before insert or update on public.nusa_assets for each row execute function public.nusa_capture_master_data_event();
 drop trigger if exists nusa_tenants_master_event on public.nusa_tenants;
-create trigger nusa_tenants_master_event before insert or update on public.nusa_tenants for each row execute function public.nusa_capture_master_data_event();
+create trigger nusa_tenants_master_event after insert or update on public.nusa_tenants for each row execute function public.nusa_capture_master_data_event();
