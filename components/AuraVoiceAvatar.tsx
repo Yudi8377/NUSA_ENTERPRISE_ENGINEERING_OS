@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AudioLines, Mic, MicOff, Send, Volume2, X, Sparkles } from "lucide-react";
+import { Mic, Volume2, X, Sparkles, Navigation, Database, Wallet, Wrench } from "lucide-react";
 
 type RecognitionResult = { [index:number]: { transcript:string }; length:number };
 type RecognitionEvent = { results: RecognitionResult[] };
@@ -55,7 +55,9 @@ const routes:{label:string;path:string;keywords:string[]}[]=[
  {label:"Budgets & Forecast",path:"/erp/budgets/",keywords:["anggaran erp","budget control"]},
  {label:"Tax & Compliance",path:"/erp/tax/",keywords:["pajak erp","tax compliance"]},
  {label:"Bank Reconciliation",path:"/erp/bank-reconciliation/",keywords:["rekonsiliasi bank","bank reconciliation"]},
- {label:"Fixed Assets",path:"/erp/fixed-assets/",keywords:["aset tetap","fixed assets"]},
+ {label:"Fixed Assets",path:"/erp/fixed-assets/",keywords:["aset tetap","depresiasi","fixed assets"]},
+ {label:"Expenses & Claims",path:"/erp/expenses/",keywords:["biaya","expense","klaim biaya","expenses"]},
+ {label:"Financial Reports",path:"/erp/reports/",keywords:["laporan keuangan","financial reports","neraca","laba rugi","arus kas"]},
  {label:"Cost Centres",path:"/erp/cost-centers/",keywords:["pusat biaya","cost center"]},
  {label:"Period Close",path:"/erp/period-close/",keywords:["tutup buku","period close"]},
  {label:"Command Center",path:"/",keywords:["beranda","command center","dashboard","utama"]},
@@ -90,7 +92,7 @@ function makeReply(text:string,path:string){
   if(/buka|pergi|masuk|tampilkan|menuju|navigasi/.test(q))return "Baik, saya membuka "+route.label+".";
   return route.label+". "+(route.path==="/master-data/"?"Di sini Anda mengelola organisasi, proyek, pegawai, dan aset.":route.path==="/operations/"?"Di sini Anda mengelola pekerjaan engineering dan alur persetujuan.":"Gunakan menu ini untuk membuka workspace "+route.label+".");
  }
- if(/data contoh|25 data|data demo/.test(q))return "Buka Master Data, lalu tekan Muat 25 data contoh. NUSA akan menyiapkan 5 proyek, 10 pegawai, dan 10 aset sintetis pada organisasi yang dipilih atau membuat organisasi demo jika belum ada.";
+ if(/data contoh|25 data|data demo/.test(q))return "Buka Master Data, lalu tekan Muat 25 data contoh. NUSA akan menyiapkan 5 proyek, 10 pegawai, 10 aset, serta contoh transaksi ERP/Finance dan payroll sintetis pada organisasi aktif atau organisasi demo baru.";
  if(/organisasi|tenant/.test(q))return "Organisasi adalah batas utama data NUSA. Buat atau pilih organisasi terlebih dahulu; proyek, pegawai, dan aset harus berada dalam organisasi yang sama.";
  if(/terima kasih|makasih/.test(q))return "Sama-sama. Saya siap membantu Anda.";
  return "Saya menangkap: "+text+". Untuk saat ini saya dapat membantu navigasi NUSA dan panduan menu. Untuk analisis substantif atau tindakan yang mengubah data, gunakan modul terkait dan ikuti kontrol akses serta persetujuan yang berlaku.";
@@ -100,10 +102,10 @@ export default function AuraVoiceAvatar(){
  const [open,setOpen]=useState(false);
  const [listening,setListening]=useState(false);
  const [speaking,setSpeaking]=useState(false);
- const [input,setInput]=useState("");
+ const [lastHeard,setLastHeard]=useState("");
  const [reply,setReply]=useState("Halo, saya AURA. Tekan mikrofon untuk berbicara atau ketik pertanyaan.");
  const recognition=useRef<RecognitionLike|null>(null);
- const inputRef=useRef<HTMLInputElement>(null);
+
  useEffect(()=>()=>{recognition.current?.stop();if(typeof window!=="undefined")window.speechSynthesis?.cancel();},[]);
  const speak=(text:string)=>{
   if(typeof window==="undefined"||!("speechSynthesis" in window))return;
@@ -117,7 +119,8 @@ export default function AuraVoiceAvatar(){
  };
  const respond=(raw:string)=>{
   const text=raw.trim();if(!text)return;
-  const answer=makeReply(text,window.location.pathname);setInput("");setReply(answer);
+  setLastHeard(text);
+  const answer=makeReply(text,window.location.pathname);setReply(answer);
   speak(answer);
   const q=text.toLocaleLowerCase("id-ID");
   const route=routes.find(r=>r.keywords.some(k=>q.includes(k)));
@@ -130,7 +133,7 @@ export default function AuraVoiceAvatar(){
   if(!Constructor){setReply("Browser ini belum mendukung input suara. Gunakan kolom teks di bawah, atau buka NUSA dengan Chrome atau Edge terbaru.");return;}
   if(listening){recognition.current?.stop();setListening(false);return;}
   const rec=new Constructor();recognition.current=rec;rec.lang="id-ID";rec.continuous=false;rec.interimResults=false;
-  rec.onresult=(event)=>{const transcript=Array.from({length:event.results.length},(_,i)=>event.results[i][0].transcript).join(" ");setInput(transcript);respond(transcript);};
+  rec.onresult=(event)=>{const transcript=Array.from({length:event.results.length},(_,i)=>event.results[i][0].transcript).join(" ");respond(transcript);};
   rec.onerror=(event)=>{setListening(false);setReply(event.error==="not-allowed"?"Izin mikrofon ditolak. Aktifkan izin mikrofon pada browser untuk berbicara dengan AURA.":"Input suara tidak tersedia saat ini. Silakan gunakan kolom teks.");};
   rec.onend=()=>setListening(false);
   try{rec.start();setListening(true);setReply("Saya mendengarkan. Silakan bicara dalam bahasa Indonesia.");}catch{setListening(false);setReply("Mikrofon belum dapat dimulai. Coba lagi atau gunakan teks.");}
@@ -140,12 +143,20 @@ export default function AuraVoiceAvatar(){
    <header className="aura-voice-header"><div className="aura-avatar aura-avatar-small" aria-hidden="true"><span/></div><div className="aura-voice-heading"><b>AURA</b><span>Pendamping suara NUSA · Bahasa Indonesia</span></div><button className="aura-icon-button" aria-label="Tutup AURA" onClick={()=>{setOpen(false);recognition.current?.stop();setListening(false);}}><X size={17}/></button></header>
    <div className="aura-voice-message" aria-live="polite">{reply}</div>
    <div className="aura-voice-state"><span className={listening?"aura-live-dot":"aura-idle-dot"}/>{listening?"Mendengarkan…":speaking?"Sedang berbicara…":"Siap membantu"}</div>
-   <form className="aura-voice-compose" onSubmit={e=>{e.preventDefault();respond(input);}}>
-    <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} aria-label="Tulis pertanyaan untuk AURA" placeholder="Tanyakan atau perintahkan…" />
-    <button type="submit" aria-label="Kirim pertanyaan" disabled={!input.trim()}><Send size={16}/></button>
-   </form>
-   <div className="aura-voice-actions"><button onClick={startListening} className={listening?"is-active":""}><Mic size={15}/>{listening?"Berhenti mendengar":"Bicara"}</button><button onClick={()=>speak(reply)}><Volume2 size={15}/>Bacakan</button></div>
-   <p className="aura-voice-footnote"><Sparkles size={12}/> Navigasi dan panduan suara. Aksi yang mengubah data tetap dilakukan melalui modul resmi NUSA.</p>
+   <div className="aura-voice-orb-stage" aria-label="Antarmuka suara AURA">
+    <div className={"aura-voice-orb"+(listening?" is-listening":"")+(speaking?" is-speaking":"")}><span/><i/><i/><i/></div>
+    <b>{listening?"AURA sedang mendengarkan":speaking?"AURA sedang berbicara":"Bicara dengan AURA"}</b>
+    <span className="muted">Tekan tombol mikrofon, lalu ucapkan perintah dalam bahasa Indonesia.</span>
+   </div>
+   {lastHeard&&<div className="aura-voice-transcript"><span>PERINTAH TERAKHIR</span><p>{lastHeard}</p></div>}
+   <div className="aura-voice-actions"><button onClick={startListening} className={listening?"is-active":""}><Mic size={15}/>{listening?"Berhenti mendengar":"Mulai bicara"}</button><button onClick={()=>speak(reply)}><Volume2 size={15}/>Ulangi suara</button></div>
+   <div className="aura-voice-quick-actions" aria-label="Contoh perintah suara">
+    <button onClick={()=>respond("Buka Master Data")}><Database size={14}/> Master Data</button>
+    <button onClick={()=>respond("Buka ERP Finance")}><Wallet size={14}/> ERP & Finance</button>
+    <button onClick={()=>respond("Buka Engineering")}><Wrench size={14}/> Engineering</button>
+    <button onClick={()=>respond("Buka Command Center")}><Navigation size={14}/> Beranda</button>
+   </div>
+   <p className="aura-voice-footnote"><Sparkles size={12}/> AURA tampil sebagai avatar suara. Untuk keamanan, perubahan data dan persetujuan tetap dilakukan melalui modul resmi NUSA.</p>
   </section>}
   <button className={"aura-avatar-launcher"+(open?" is-open":"")} aria-label={open?"Tutup avatar AURA":"Buka avatar suara AURA"} aria-expanded={open} onClick={()=>setOpen(v=>!v)}>
    <span className={"aura-avatar"+(listening?" is-listening":"")+(speaking?" is-speaking":"")} aria-hidden="true"><i/><i/><i/><span/></span>

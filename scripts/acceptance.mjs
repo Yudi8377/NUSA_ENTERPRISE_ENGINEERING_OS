@@ -84,8 +84,8 @@ assert(auraPage.includes("AURA Integration Hub"), "AURA integration hub page mis
 assert(auraPage.includes("https://github.com/akvisomr-eng/AURA"), "official AURA source link missing");
 assert(auraPage.includes("tidak berpura-pura bahwa koneksi runtime langsung sudah aktif"), "AURA runtime boundary disclosure missing");
 assert(homePage.includes('["AURA Integration", Activity, "/aura/"]'), "AURA navigation entry missing");
-assert(masterUi.includes('Muat data demo lengkap'), "detailed demo loader action missing");
-assert(masterUi.includes('DEMO-PRJ-10') && masterUi.includes('DEMO-EMP-10') && masterUi.includes('DEMO-AST-10'), "sample master data definitions missing");
+assert(masterUi.includes('Muat 25 data contoh'), "25-record master-data seed action missing");
+assert(masterUi.includes('DEMO-PRJ-05') && masterUi.includes('DEMO-EMP-10') && masterUi.includes('DEMO-AST-10'), "25 master-data sample definitions missing");
 assert(masterUi.includes('created_by:userId,updated_by:userId'), "demo data must preserve authenticated actor audit fields");
 assert(masterUi.includes('NUSA Demo Engineering (DATA CONTOH)'), "empty tenant onboarding demo missing");
 assert(financeUi.includes('Bagan Akun'), "finance chart of accounts module missing");
@@ -114,6 +114,11 @@ assert(moduleHubUi.includes("Module control center"), "module hub must provide c
 assert(auraAvatar.includes('/crm/leads/'), "AURA voice navigation to CRM submodules missing");
 assert(auraAvatar.includes('/operations/structural-analysis/'), "AURA voice navigation to engineering submodules missing");
 assert(auraAvatar.includes('/erp/journals/'), "AURA voice navigation to finance submodules missing");
+assert(auraAvatar.includes('/erp/expenses/') && auraAvatar.includes('/erp/reports/'), "AURA voice navigation to expenses and financial reports missing");
+assert(auraAvatar.includes('aura-avatar-launcher'), "AURA must render as a floating voice avatar, not a data table/form");
+assert(auraAvatar.includes('aura-voice-orb-stage') && auraAvatar.includes('Mulai bicara'), "AURA voice-first avatar controls missing");
+assert(!auraAvatar.includes('aura-voice-compose') && !auraAvatar.includes('Tulis pertanyaan untuk AURA'), "AURA primary interface must not be a text-entry form");
+assert(layout.includes('AuraVoiceAvatar'), "AURA voice avatar must be mounted globally across NUSA routes");
 
 for (const key of ["leads","contacts","quotations","activities"]) assert(workspaceUi.includes(key+":"), "CRM contextual workflow missing: "+key);
 for (const key of ["recruitment","attendance","training","payroll"]) assert(workspaceUi.includes(key+":"), "HR contextual workflow missing: "+key);
@@ -133,12 +138,12 @@ for (const route of ["kpi","forecast","packs","scenarios"]) assert(read("app/rep
 for (const route of ["risks","audit","compliance","incidents"]) assert(read("app/grc/"+route+"/page.tsx").includes('section="'+route+'"'), "GRC route missing: "+route);
 
 const projectDemo = read("app/master-data/page.tsx");
-assert(projectDemo.includes('code:"DEMO-PRJ-10"'), "demo portfolio must include at least ten projects");
+assert(projectDemo.includes('code:"DEMO-PRJ-05"') && !projectDemo.includes('code:"DEMO-PRJ-06"'), "master-data demo must contain exactly five project templates");
 assert(projectDemo.includes('record_code:"DEMO-PAY-"+n'), "demo portfolio must include payroll records");
 assert(projectDemo.includes('record_code:"DEMO-BUD-"+n') && projectDemo.includes('record_code:"DEMO-AR-"+n') && projectDemo.includes('record_code:"DEMO-AP-"+n') && projectDemo.includes('record_code:"DEMO-EXP-"+n'), "demo portfolio must include linked ERP finance registers");
 assert(projectDemo.includes('PROJECT DOSSIER') && projectDemo.includes('openProjectDetail'), "project detail dossier action missing");
 assert(projectDemo.includes('Cetak / PDF') && projectDemo.includes('openMasterDetail'), "master data detail and print actions missing");
-assert(projectDemo.includes('wCount.count??0)<50'), "sample seed must verify all 50 payroll/finance records");
+assert(projectDemo.includes('wCount.count??0)<25'), "sample seed must verify 20 ERP/Finance and 5 payroll records");
 assert(financeUi.includes('async function archiveRecord'), "finance record archive action missing");
 assert(financeUi.includes('function startEdit(row:Row)'), "finance record edit action missing");
 assert(financeUi.includes('setDetailRow(r)'), "finance record detail view action missing");

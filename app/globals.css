@@ -31,3 +31,22 @@
 @media(prefers-reduced-motion:reduce){.aura-avatar,.aura-avatar:before,.aura-avatar:after,.aura-avatar i,.aura-avatar-pulse{animation:none!important}}
 
 .command-center-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:10px 15px;margin:0 0 20px;border:1px solid #47795e;border-radius:11px;background:linear-gradient(135deg,#d8f5df,#a9d8b7);color:#0b2116;text-decoration:none;font-size:13px;font-weight:700;box-shadow:0 5px 18px rgba(0,0,0,.2);transition:transform .15s ease,box-shadow .15s ease,background .15s ease}.command-center-button:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.3);background:#e4f9e9}.command-center-button:focus-visible{outline:3px solid #8ed8a6;outline-offset:3px}.command-center-button:active{transform:translateY(0)}
+
+/* AURA voice-first panel: no text-entry form */
+.aura-voice-orb-stage{display:grid;justify-items:center;gap:8px;padding:18px 8px 14px;text-align:center}
+.aura-voice-orb-stage>b{font-size:13px;letter-spacing:.02em}
+.aura-voice-orb-stage>.muted{font-size:10px;line-height:1.6;max-width:260px}
+.aura-voice-orb{position:relative;width:96px;height:96px;display:grid;place-items:center;border-radius:50%;margin:2px 0 8px;background:radial-gradient(circle at 38% 30%,#e8fff0 0,#8ceab1 8%,#35bd7b 20%,#126a4a 42%,#09251a 67%,#06120d 100%);box-shadow:inset 0 0 0 1px rgba(218,255,228,.5),0 0 32px rgba(69,217,135,.28),0 0 75px rgba(69,217,135,.09);animation:aura-breathe 3.2s ease-in-out infinite}
+.aura-voice-orb:before,.aura-voice-orb:after{content:"";position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(202,255,220,.65);transform:rotateX(66deg) rotate(24deg);animation:aura-orbit 8s linear infinite}
+.aura-voice-orb:after{inset:15px;transform:rotateX(66deg) rotate(-30deg);animation-duration:11s;animation-direction:reverse}
+.aura-voice-orb>span{position:relative;z-index:2;width:13px;height:13px;border-radius:50%;background:#effff4;box-shadow:0 0 16px 6px rgba(207,255,220,.8),0 0 34px 12px rgba(95,255,157,.45)}
+.aura-voice-orb>i{position:absolute;z-index:1;width:3px;height:20px;border-radius:9px;background:#d5ffe1;opacity:.82;transform-origin:center;animation:aura-wave .85s ease-in-out infinite alternate}
+.aura-voice-orb>i:nth-of-type(1){transform:translateX(-12px);animation-delay:-.3s}.aura-voice-orb>i:nth-of-type(2){transform:translateX(0);animation-delay:-.6s}.aura-voice-orb>i:nth-of-type(3){transform:translateX(12px);animation-delay:-.1s}
+.aura-voice-orb.is-listening{box-shadow:0 0 0 7px rgba(94,230,145,.1),0 0 45px rgba(69,217,135,.58)}
+.aura-voice-orb.is-speaking>i{animation-duration:.3s}
+.aura-voice-transcript{padding:10px 12px;border:1px solid rgba(142,216,166,.15);border-radius:10px;background:rgba(10,29,19,.72);margin:0 0 10px}
+.aura-voice-transcript>span{font-size:9px;letter-spacing:.12em;color:#8fb99e}.aura-voice-transcript>p{font-size:11px;line-height:1.6;margin:5px 0 0;color:#d9f2e1}
+.aura-voice-quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}
+.aura-voice-quick-actions button{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 7px;min-width:0;border:1px solid #29463a;border-radius:10px;background:rgba(12,35,23,.84);color:#cdebd6;font-size:10px;cursor:pointer}
+.aura-voice-quick-actions button:hover{border-color:#8ed8a6;background:#153b28}
+@media(prefers-reduced-motion:reduce){.aura-voice-orb,.aura-voice-orb:before,.aura-voice-orb:after,.aura-voice-orb>i{animation:none!important}}
