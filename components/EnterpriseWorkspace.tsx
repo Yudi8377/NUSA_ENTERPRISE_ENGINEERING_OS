@@ -154,6 +154,12 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
   event.preventDefault();if(!userId||!tenantId||!newTitle.trim())return;
   const missing=config.fields.find(field=>field.required&&!(fieldValues[field.key]??"").trim());
   if(missing){setError("Kolom wajib diisi: "+missing.label+".");return;}
+  for(const field of config.fields.filter(field=>field.type==="number"&&(fieldValues[field.key]??"").trim())){
+   const n=Number(fieldValues[field.key]);
+   if(!Number.isFinite(n)||n<0){setError(field.label+" harus berupa angka nol atau lebih.");return;}
+   if(["probability","confidence"].includes(field.key)&&n>100){setError(field.label+" tidak boleh lebih dari 100.");return;}
+   if(["likelihood","impact"].includes(field.key)&&(n<1||n>5)){setError(field.label+" harus berada pada rentang 1 sampai 5.");return;}
+  }
   if(config.fields.some(field=>field.type==="email"&&(fieldValues[field.key]??"").trim()&&(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fieldValues[field.key].trim())))){setError("Periksa format email kontak.");return;}
   const invalidUrl=config.fields.find(field=>field.type==="url"&&(fieldValues[field.key]??"").trim()&&!/^https?:\/\//i.test(fieldValues[field.key].trim()));
   if(invalidUrl){setError("Tautan "+invalidUrl.label+" harus dimulai dengan https:// atau http://.");return;}
