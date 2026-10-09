@@ -6,6 +6,9 @@ GitHub is the source/version-control/CI/CD/static-hosting plane. Supabase Free i
 
 ## Verified in the latest release candidate
 
+- Master data database migration `20261009012000_nusa_master_data_crud` and foreign-key index migration `20261009012500_nusa_master_data_fk_indexes` applied successfully to Supabase. A direct catalog query confirmed RLS is enabled on `nusa_tenants`, `nusa_projects`, `nusa_employees`, `nusa_assets`, and `nusa_master_data_events`.
+- Master Data UI is being added on a feature branch with organization profile, project CRUD/archiving, employee CRUD/archiving, asset CRUD/archiving, project/person assignment, tenant-scoped RLS, and audit-event triggers. It is not production-deployed until the PR quality and Pages runtime gates pass.
+
 - Quality Gate #112 for commit `3f45ef888339dcf59cdfbc1f5df2d70f838c741a`: PASS. Smoke test, acceptance test, lint and production build completed successfully.
 - GitHub Pages Deploy #109 for the same commit: build, static export, artifact upload and deployment steps completed successfully.
 - Supabase Security Advisor: zero findings returned after the approval policy change.
@@ -28,6 +31,7 @@ These results verify automated build/deployment, the currently inspected RLS con
 | First tenant/workspace onboarding | BLOCKED / NOT YET VERIFIED | Pilot user creates a workspace; membership is visible for that user |
 | Tenant isolation | NOT VERIFIED | Two distinct test tenants/users; prove cross-tenant read/write denied |
 | Workspace CRUD and audit trail | NOT VERIFIED against real sessions | Create/update/status transition; verify audit event and denied audit mutation |
+| Master data: organization, project, employee, asset | Database migration applied; UI release pending | Owner profile update, create/edit/archive, project/employee/asset relations, tenant-isolation E2E, audit event checks |
 | High/critical engineering approval | RLS reviewer policy and database guard present; live E2E NOT VERIFIED | Attempt transition without approval (must fail), then approved independent human flow succeeds |
 | Backup/export and restore drill | NOT VERIFIED | Export/backup, restore to a safe test target, compare counts/hashes |
 | Mobile/desktop UX and accessibility | PARTIAL / MANUAL | Test narrow and wide screens, keyboard flow, error states, and destructive confirmations |
