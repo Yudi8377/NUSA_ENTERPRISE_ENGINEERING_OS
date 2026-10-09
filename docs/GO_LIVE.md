@@ -65,3 +65,22 @@ NUSA may calculate, check, compare, forecast, explain, and draft recommendations
 - **RED:** build/security/deployment failure or an unsafe governance bypass exists.
 
 Current overall state is **AMBER**, because the live project has no registered users or tenant data yet, so session-based acceptance cannot honestly be marked passed.
+
+
+## Email confirmation redirect repair (2026-10-09)
+
+The production sign-up client now explicitly requests this confirmation redirect:
+`https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/`
+
+Commit: `736ed8cb549639389a0467e19873f59e1d105617`.
+
+The Supabase Auth dashboard configuration must also be verified manually because the current connected Supabase tools do not expose Auth URL Configuration write access:
+
+1. Open [Supabase Auth URL Configuration](https://supabase.com/dashboard/project/abdhojyqvffprfqskwmt/auth/url-configuration).
+2. Set **Site URL** to `https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/`.
+3. Add that exact URL to **Redirect URLs** and save.
+4. If the signup email template is customized, ensure its confirmation link respects the redirect target (use `{{ .ConfirmationURL }}`, or the appropriate `{{ .RedirectTo }}` pattern for a custom confirmation handler); do not hard-code `localhost` or `{{ .SiteURL }}` into a link that overrides the requested redirect.
+5. Wait for the new GitHub Pages deployment to finish, then use a fresh confirmation email. Links already sent before this fix may still contain the old localhost destination.
+6. Confirm the resulting browser URL remains on GitHub Pages and the signed-in session is established. If the link still goes to localhost, inspect the actual confirmation email template and Auth URL configuration before retrying.
+
+The code change is committed, but the final live test remains pending until deployment and the Supabase dashboard settings have both been verified.
