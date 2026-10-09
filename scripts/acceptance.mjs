@@ -18,7 +18,7 @@ const approvalDecision = read("supabase/migrations/20261009015000_nusa_atomic_ap
 const workspaceUi = read("components/EnterpriseWorkspace.tsx");
 const auraPage = read("app/aura/page.tsx");
 const homePage = read("app/page.tsx");
-const masterUi = read("app/master-data/page.tsx");
+const masterUi = read("app/master-data/page.tsx");\nconst auraAvatar = read("components/AuraVoiceAvatar.tsx");\nconst layout = read("app/layout.tsx");
 
 assert(governance.includes("status text not null default 'queued' check(status in ('queued','running','review','approved','rejected','completed','failed','cancelled'))"), "engineering run status enum missing");
 assert(governance.includes("criticality text not null default 'normal' check(criticality in ('normal','high','critical'))"), "engineering criticality enum missing");
