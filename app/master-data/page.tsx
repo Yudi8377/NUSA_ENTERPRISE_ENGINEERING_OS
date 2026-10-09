@@ -253,16 +253,17 @@ export default function MasterDataPage(){
     if(inserted.error)throw new Error("Gagal menyimpan data payroll/ERP demo: "+inserted.error.message);
    }
    setSeedStep("Memverifikasi proyek, pegawai, aset, payroll, dan ERP/Finance…");
-   const [pCount,eCount,aCount]=await Promise.all([
+   const [pCount,eCount,aCount,wCount]=await Promise.all([
     supabase.from("nusa_projects").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null),
     supabase.from("nusa_employees").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null),
-    supabase.from("nusa_assets").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null)
+    supabase.from("nusa_assets").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null),
+    supabase.from("nusa_workspace_records").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).in("record_code",demoCodes).is("archived_at",null)
    ]);
-   if(pCount.error||eCount.error||aCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, dan aset.");
-   if((pCount.count??0)<10||(eCount.count??0)<10||(aCount.count??0)<10)throw new Error("Sebagian data contoh belum lengkap. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
+   if(pCount.error||eCount.error||aCount.error||wCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, aset, dan ERP/Finance.");
+   if((pCount.count??0)<10||(eCount.count??0)<10||(aCount.count??0)<10||(wCount.count??0)<50)throw new Error("Sebagian data contoh belum lengkap. Target minimal: 10 proyek, 10 pegawai, 10 aset, serta 50 rekaman payroll/ERP. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
    setTab("projects");
    setNotice("SELESAI — data sintetis terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");
-   setSeedStep("Selesai — 10 proyek, SDM, aset, payroll, dan 40 rekaman ERP/Finance demo siap.");
+   setSeedStep("Selesai — 10 proyek, 10 pegawai, 10 aset, dan 50 payroll/ERP demo siap.");
    await refresh();
   }catch(err){
    setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");
