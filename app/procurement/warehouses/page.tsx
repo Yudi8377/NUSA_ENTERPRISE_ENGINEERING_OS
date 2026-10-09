@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="warehouses" title="Warehouse Master" eyebrow="SUPPLY CHAIN / WAREHOUSE MANAGEMENT" description="Daftar lokasi gudang, tipe penyimpanan, kapasitas, penanggung jawab, dan kontrol operasional. Pendaftaran gudang belum mengubah saldo stok." recordType="procurement_warehouse" recordLabel="Gudang"/>}
