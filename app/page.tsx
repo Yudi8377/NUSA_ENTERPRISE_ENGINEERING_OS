@@ -86,7 +86,7 @@ export default function Home() {
 
   const auth=async()=>{
     setBusy(true); setNotice("");
-    const r=mode==="signin" ? await supabase.auth.signInWithPassword({email,password}) : await supabase.auth.signUp({email,password});
+    const r=mode==="signin" ? await supabase.auth.signInWithPassword({email,password}) : await supabase.auth.signUp({email,password,options:{emailRedirectTo:"https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/"}});
     if(r.error) setNotice(r.error.message);
     else { setNotice(mode==="signup"?"Akun dibuat. Jika verifikasi email aktif, cek inbox lalu masuk.":"Berhasil masuk."); setAuthOpen(false); await load(); }
     setBusy(false);
