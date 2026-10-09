@@ -94,7 +94,7 @@ export default function MasterDataPage(){
   let result:any;
   if(tab==="organization"){
    result=await supabase.from("nusa_tenants").update({
-    name:values.name.trim(),legal_name:values.legal_name.trim()||null,industry:values.industry.trim()||null,tax_id:values.tax_id.trim()||null,address:values.address.trim()||null,city:values.city.trim()||null,phone:values.phone.trim()||null,contact_email:values.contact_email.trim()||null,website:values.website.trim()||null
+    name:values.name.trim(),legal_name:values.legal_name.trim()||null,industry:values.industry.trim()||null,tax_id:values.tax_id.trim()||null,address:values.address.trim()||null,city:values.city.trim()||null,phone:values.phone.trim()||null,contact_email:values.contact_email.trim()||null,website:values.website.trim()||null,updated_at:new Date().toISOString()
    }).eq("id",tenantId).select("id").single();
   }else if(tab==="projects"){
    const progress=Number(values.progress||0),budget=values.budget.trim()?Number(values.budget):null;
