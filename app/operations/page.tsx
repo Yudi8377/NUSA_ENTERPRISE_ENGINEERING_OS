@@ -9,11 +9,11 @@ import { approvals, createEngineeringRun, engineeringRuns } from "../../lib/oper
 
 type Tenant = { id:string; name:string; code?:string };
 type Project = { id:string; code:string; name:string; status:string };
-type Run = { id:string; run_type:string; status:string; criticality:string; agent_code:string|null; created_at:string };
-type Approval = { id:string; approval_type:string; status:string; created_at:string };
+type Run = { id:string; project_id:string|null; run_type:string; status:string; criticality:string; agent_code:string|null; created_at:string };
+type Approval = { id:string; approval_type:string; status:string; created_at:string; requested_by:string|null; project_id:string|null; run_id:string|null; decision_note:string|null; decided_at:string|null };
 
 export default function OperationsPage(){
- const [tenantList,setTenantList]=useState<Tenant[]>([]);
+ const [currentUserId,setCurrentUserId]=useState("");\n const [reviewerAllowed,setReviewerAllowed]=useState(false);\n const [tenantList,setTenantList]=useState<Tenant[]>([]);
  const [tenant,setTenant]=useState<Tenant|null>(null);
  const [tenantId,setTenantId]=useState("");
  const [projectList,setProjectList]=useState<Project[]>([]);
@@ -30,7 +30,7 @@ export default function OperationsPage(){
  const refresh=useCallback(async()=>{
   setLoading(true);
   const u=await currentUser();
-  if(!u){setTenant(null);setTenantList([]);setProjectList([]);setRuns([]);setApprovalRows([]);setNotice("Masuk ke NUSA untuk menjalankan engineering workflow.");setLoading(false);return;}
+  if(!u){setCurrentUserId("");setReviewerAllowed(false);setTenant(null);setTenantList([]);setProjectList([]);setRuns([]);setApprovalRows([]);setNotice("Masuk ke NUSA untuk menjalankan engineering workflow.");setLoading(false);return;}\n  setCurrentUserId(u.id);
   const t=await myTenants();
   if(t.error){setNotice("Organisasi gagal dimuat: "+t.error.message);setLoading(false);return;}
   const list=(t.data??[]) as Tenant[];
@@ -40,7 +40,7 @@ export default function OperationsPage(){
   const selected=list.find(x=>x.id===activeId)??null;
   setTenant(selected);
   if(!selected){setProjectList([]);setProjectId("");setRuns([]);setApprovalRows([]);setNotice("Belum ada organisasi. Buat organisasi dan proyek dari Master Data.");setLoading(false);return;}
-  const [p,r,a]=await Promise.all([getProjects(selected.id),engineeringRuns(selected.id),approvals(selected.id)]);
+  const [p,r,a,membership]=await Promise.all([getProjects(selected.id),engineeringRuns(selected.id),approvals(selected.id),supabase.from("nusa_memberships").select("role_code").eq("tenant_id",selected.id).eq("user_id",u.id).maybeSingle()]);\n  setReviewerAllowed(!membership.error&&["owner","admin","approver","engineering_lead"].includes(String(membership.data?.role_code??"").toLowerCase()));
   if(p.error){setNotice("Proyek gagal dimuat: "+p.error.message);setProjectList([]);setProjectId("");}
   else{
    const ps=(p.data??[]) as Project[];
@@ -71,7 +71,7 @@ export default function OperationsPage(){
   else{setNotice(criticality==="normal"?"Engineering run tercatat pada proyek terpilih.":"Engineering run tercatat pada proyek terpilih dan human approval dibuat otomatis.");await refresh();}
   setBusy(false);
  };
- const pending=approvalRows.filter(a=>a.status==="pending").length;
+ const pending=approvalRows.filter(a=>a.status==="pending").length;\n const decide=async(a:Approval,decision:"approved"|"rejected")=>{\n  if(!currentUserId||!reviewerAllowed||a.requested_by===currentUserId){setNotice("Keputusan memerlukan reviewer berwenang yang bukan pemohon.");return;}\n  setBusy(true);setNotice("");\n  const result=await supabase.from("nusa_approvals").update({status:decision,decided_by:currentUserId,decision_note:decision==="approved"?"Disetujui oleh reviewer berwenang":"Ditolak oleh reviewer berwenang",decided_at:new Date().toISOString()}).eq("id",a.id).eq("status","pending").select("id").single();\n  if(result.error)setNotice("Keputusan tidak tersimpan: "+result.error.message);else{setNotice(decision==="approved"?"Approval disetujui dan dicatat.":"Approval ditolak dan dicatat.");await refresh();}\n  setBusy(false);\n };
 
  return <main className="nusa gridbg nusa-ops"><section className="ops-shell">
   <header className="ops-header"><Link href="/" className="ops-back"><ArrowLeft size={15}/> Command Center</Link><div className="ops-eyebrow">NUSA ENGINEERING CONTROL PLANE</div><h1 className="brand ops-title">Operations Studio</h1><p className="muted">Buat workflow engineering yang terikat ke organisasi dan proyek. Run berisiko tinggi tetap membutuhkan persetujuan manusia.</p></header>
@@ -91,10 +91,10 @@ export default function OperationsPage(){
     {notice&&<div role="status" className="ops-notice">{notice}</div>}
    </form>
    <div className="glass ops-card"><div className="ops-card-head"><div><span className="muted ops-label">GOVERNANCE</span><h2>Live queue</h2></div><Activity size={18}/></div><div className="ops-metrics"><div><b>{runs.length}</b><span>Runs</span></div><div><b>{pending}</b><span>Pending approvals</span></div><div><b>{runs.filter(r=>r.criticality!=="normal").length}</b><span>Gated</span></div></div>
-    <div className="ops-list">{loading?<div className="empty-state">Memuat workflow…</div>:runs.length?runs.slice(0,8).map(r=><div className="ops-row" key={r.id}><div><b>{r.run_type}</b><span>{r.agent_code||"unassigned"} · {r.criticality}</span></div><em>{r.status}</em></div>):<div className="empty-state">Belum ada engineering run pada organisasi ini.</div>}</div>
+    <div className="ops-list">{loading?<div className="empty-state">Memuat workflow…</div>:runs.length?runs.slice(0,8).map(r=><div className="ops-row" key={r.id}><div><b>{r.run_type}</b><span>{r.agent_code||"unassigned"} · {r.criticality}{r.project_id?" · "+(projectList.find(p=>p.id===r.project_id)?.name??"proyek terkait"):" · tanpa proyek"}</span></div><em>{r.status}</em></div>):<div className="empty-state">Belum ada engineering run pada organisasi ini.</div>}</div>
    </div>
   </div>}
-  {tenant&&<div className="glass ops-card ops-approvals"><div className="ops-card-head"><div><span className="muted ops-label">HUMAN APPROVAL</span><h2>Decision queue</h2></div><CheckCircle2 size={18}/></div>{approvalRows.length?approvalRows.slice(0,8).map(a=><div className="ops-row" key={a.id}><div><b>{a.approval_type}</b><span>{new Date(a.created_at).toLocaleString("id-ID")}</span></div><em>{a.status}</em></div>):<div className="empty-state">Approval queue kosong.</div>}</div>}
+  {tenant&&<div className="glass ops-card ops-approvals"><div className="ops-card-head"><div><span className="muted ops-label">HUMAN APPROVAL</span><h2>Decision queue</h2></div><CheckCircle2 size={18}/></div>{approvalRows.length?approvalRows.slice(0,8).map(a=><div className="ops-row" key={a.id}><div><b>{a.approval_type}</b><span>{new Date(a.created_at).toLocaleString("id-ID")}{a.project_id?" · "+(projectList.find(p=>p.id===a.project_id)?.name??"proyek terkait"):""}</span>{a.decision_note&&<span>{a.decision_note}</span>}</div><div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}><em>{a.status}</em>{a.status==="pending"&&reviewerAllowed&&a.requested_by!==currentUserId&&<><button disabled={busy} onClick={()=>void decide(a,"approved")} className="ops-primary" style={{padding:"7px 9px",fontSize:11}}>Setujui</button><button disabled={busy} onClick={()=>void decide(a,"rejected")} className="glass" style={{padding:"7px 9px",fontSize:11,color:"#ffd1c9",border:"1px solid #70483f"}}>Tolak</button></>}{a.status==="pending"&&a.requested_by===currentUserId&&<span className="muted" style={{fontSize:10}}>Reviewer lain diperlukan</span>}</div></div>):<div className="empty-state">Approval queue kosong.</div>}</div>}
   {notice&&tenant&&<div role="status" className="ops-notice" style={{marginTop:12}}>{notice}</div>}
   <div className="muted" style={{fontSize:11,marginTop:12,display:"flex",gap:8,alignItems:"center"}}><FolderKanban size={14}/> Data disaring berdasarkan organisasi terpilih; run dapat dihubungkan ke proyek tertentu.</div>
  </section></main>;
