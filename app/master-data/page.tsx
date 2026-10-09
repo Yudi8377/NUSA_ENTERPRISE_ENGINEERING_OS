@@ -10,7 +10,8 @@ type Tenant = {id:string;name:string;code:string;status:string;legal_name?:strin
 type Project = {id:string;tenant_id:string;code:string;name:string;category:string;status:string;progress:number;budget:number|null;target_date:string|null;deleted_at:string|null;updated_at:string};
 type Employee = {id:string;tenant_id:string;project_id:string|null;employee_code:string;full_name:string;email:string|null;phone:string|null;position_title:string|null;employment_status:string;joined_on:string|null;notes:string|null;updated_at:string};
 type Asset = {id:string;tenant_id:string;project_id:string|null;assigned_employee_id:string|null;asset_code:string;name:string;category:string;condition_status:string;asset_status:string;acquisition_date:string|null;acquisition_cost:number|null;location:string|null;notes:string|null;updated_at:string};
-type MasterEvent = {id:string;entity_table:string;entity_id:string;actor_id:string|null;action:string;created_at:string;after_state:Record<string,unknown>};\ntype ProjectWorkspaceRecord = {id:string;module_code:string;record_type:string;record_code:string|null;title:string;description:string|null;status:string;amount:number|null;currency:string;data:Record<string,unknown>;updated_at:string};
+type MasterEvent = {id:string;entity_table:string;entity_id:string;actor_id:string|null;action:string;created_at:string;after_state:Record<string,unknown>};
+type ProjectWorkspaceRecord = {id:string;module_code:string;record_type:string;record_code:string|null;title:string;description:string|null;status:string;amount:number|null;currency:string;data:Record<string,unknown>;updated_at:string};
 type Tab = "organization"|"projects"|"employees"|"assets";
 type FormValues = Record<string,string>;
 const tabs:{id:Tab;label:string;description:string;icon:typeof Building2}[]=[
@@ -36,7 +37,11 @@ export default function MasterDataPage(){
  const [projects,setProjects]=useState<Project[]>([]);
  const [employees,setEmployees]=useState<Employee[]>([]);
  const [assets,setAssets]=useState<Asset[]>([]);
- const [events,setEvents]=useState<MasterEvent[]>([]);\n const [detailProjectId,setDetailProjectId]=useState("");\n const [detailRecords,setDetailRecords]=useState<ProjectWorkspaceRecord[]>([]);\n const [detailLoading,setDetailLoading]=useState(false);\n const [masterDetail,setMasterDetail]=useState<{kind:"employees"|"assets";row:Employee|Asset}|null>(null);
+ const [events,setEvents]=useState<MasterEvent[]>([]);
+ const [detailProjectId,setDetailProjectId]=useState("");
+ const [detailRecords,setDetailRecords]=useState<ProjectWorkspaceRecord[]>([]);
+ const [detailLoading,setDetailLoading]=useState(false);
+ const [masterDetail,setMasterDetail]=useState<{kind:"employees"|"assets";row:Employee|Asset}|null>(null);
  const [values,setValues]=useState<FormValues>({...blank.organization});
  const [editingId,setEditingId]=useState("");
  const [query,setQuery]=useState("");
@@ -134,7 +139,8 @@ export default function MasterDataPage(){
     :await supabase.from("nusa_assets").update({archived_at:now,asset_status:"retired",updated_by:userId}).eq("id",row.id).eq("tenant_id",tenantId).select("id").single();
   if(result.error)setError("Arsip gagal: "+result.error.message);else{setNotice("Data berhasil diarsipkan.");if(editingId===row.id)cancelEdit();await refresh();}
  }
- function openMasterDetail(kind:"employees"|"assets",row:Employee|Asset){setMasterDetail({kind,row});}\n async function openProjectDetail(project:Project){
+ function openMasterDetail(kind:"employees"|"assets",row:Employee|Asset){setMasterDetail({kind,row});}
+ async function openProjectDetail(project:Project){
   setDetailProjectId(project.id);setDetailRecords([]);setDetailLoading(true);setError("");
   const result=await supabase.from("nusa_workspace_records").select("id,module_code,record_type,record_code,title,description,status,amount,currency,data,updated_at").eq("tenant_id",project.tenant_id).eq("project_id",project.id).is("archived_at",null).order("updated_at",{ascending:false}).limit(100);
   if(result.error)setError("Detail proyek dimuat, tetapi data payroll/ERP gagal dibaca: "+result.error.message);
