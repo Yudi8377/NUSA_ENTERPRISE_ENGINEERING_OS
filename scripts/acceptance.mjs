@@ -15,6 +15,7 @@ const onboarding = read("supabase/migrations/20261009014000_nusa_workspace_onboa
 const masterPage = read("app/master-data/page.tsx");
 const operationsPage = read("app/operations/page.tsx");
 const approvalDecision = read("supabase/migrations/20261009015000_nusa_atomic_approval_decision.sql");
+const workspaceUi = read("components/EnterpriseWorkspace.tsx");
 
 assert(governance.includes("status text not null default 'queued' check(status in ('queued','running','review','approved','rejected','completed','failed','cancelled'))"), "engineering run status enum missing");
 assert(governance.includes("criticality text not null default 'normal' check(criticality in ('normal','high','critical'))"), "engineering criticality enum missing");
@@ -60,4 +61,12 @@ assert(approvalDecision.includes("security invoker"), "approval RPC must respect
 assert(approvalDecision.includes("requester cannot approve their own request"), "approval RPC must prevent self-approval");
 assert(approvalDecision.includes("update public.nusa_engineering_runs"), "approval decision must transition the linked run");
 
+assert(workspaceUi.includes('titleLabel:"Nama transaksi / dokumen"'), "ERP contextual form fields missing");
+assert(workspaceUi.includes('titleLabel:"Nama pelanggan / peluang"'), "CRM contextual form fields missing");
+assert(workspaceUi.includes('titleLabel:"Nama kebutuhan SDM / aktivitas"'), "HR contextual form fields missing");
+assert(workspaceUi.includes('titleLabel:"Nama barang / jasa yang dibutuhkan"'), "Procurement contextual form fields missing");
+assert(workspaceUi.includes('titleLabel:"Nama laporan / analisis"'), "Reports contextual form fields missing");
+assert(workspaceUi.includes('titleLabel:"Nama risiko / temuan / kontrol"'), "GRC contextual form fields missing");
+assert(workspaceUi.includes('schema_version:1'), "workspace contextual data schema version missing");
+assert(workspaceUi.includes('summaryKeys.filter'), "contextual record summary missing");
 console.log("NUSA operational acceptance static assertions: PASS");
