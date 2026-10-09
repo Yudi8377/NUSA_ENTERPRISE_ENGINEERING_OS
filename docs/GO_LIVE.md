@@ -6,7 +6,7 @@ GitHub is the source/version-control/CI/CD/static-hosting plane. Supabase Free i
 
 ## Verified in the latest release candidate
 
-- Master data database migration `20261009012000_nusa_master_data_crud` and foreign-key index migration `20261009012500_nusa_master_data_fk_indexes` applied successfully to Supabase. A direct catalog query confirmed RLS is enabled on `nusa_tenants`, `nusa_projects`, `nusa_employees`, `nusa_assets`, and `nusa_master_data_events`.
+- Master data database migration `20261009012000_nusa_master_data_crud`, foreign-key index migration `20261009012500_nusa_master_data_fk_indexes`, and first-workspace RLS onboarding fix `20261009013000_nusa_create_workspace_rls_fix` applied successfully to Supabase. Workspace creation now uses a narrowly scoped `SECURITY DEFINER` RPC that validates `auth.uid()`, input bounds, and grants execution only to `authenticated` users. A direct catalog query confirmed RLS is enabled on `nusa_tenants`, `nusa_projects`, `nusa_employees`, `nusa_assets`, and `nusa_master_data_events`.
 - Master Data UI is being added on a feature branch with organization profile, project CRUD/archiving, employee CRUD/archiving, asset CRUD/archiving, project/person assignment, tenant-scoped RLS, and audit-event triggers. It is not production-deployed until the PR quality and Pages runtime gates pass.
 
 - Quality Gate #112 for commit `3f45ef888339dcf59cdfbc1f5df2d70f838c741a`: PASS. Smoke test, acceptance test, lint and production build completed successfully.
