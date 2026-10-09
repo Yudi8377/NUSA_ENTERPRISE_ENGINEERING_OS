@@ -1,0 +1,11 @@
+create index if not exists idx_nusa_payroll_runs_prepared_by on public.nusa_payroll_runs(prepared_by);
+create index if not exists idx_nusa_payroll_runs_reviewed_by on public.nusa_payroll_runs(reviewed_by) where reviewed_by is not null;
+create index if not exists idx_nusa_payroll_runs_approved_by on public.nusa_payroll_runs(approved_by) where approved_by is not null;
+create index if not exists idx_nusa_payroll_runs_paid_by on public.nusa_payroll_runs(paid_by) where paid_by is not null;
+create index if not exists idx_nusa_payroll_lines_employee_id on public.nusa_payroll_lines(employee_id);
+create index if not exists idx_nusa_payroll_lines_attendance_record_id on public.nusa_payroll_lines(attendance_record_id) where attendance_record_id is not null;
+create index if not exists idx_nusa_payroll_lines_created_by on public.nusa_payroll_lines(created_by);
+create index if not exists idx_nusa_payroll_lines_updated_by on public.nusa_payroll_lines(updated_by);
+create index if not exists idx_nusa_employee_compensation_employee_id on public.nusa_employee_compensation(employee_id);
+create index if not exists idx_nusa_employee_compensation_created_by on public.nusa_employee_compensation(created_by);
+create index if not exists idx_nusa_employee_compensation_updated_by on public.nusa_employee_compensation(updated_by);
