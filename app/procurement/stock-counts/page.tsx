@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="counts" title="Stock Opname & Cycle Count" eyebrow="SUPPLY CHAIN / INVENTORY ASSURANCE" description="Catat saldo sistem, hasil hitung fisik, selisih, investigasi, dan keputusan adjustment. Selisih wajib ditinjau sebelum penyesuaian saldo." recordType="procurement_stock_count" recordLabel="Hasil stock opname"/>}
