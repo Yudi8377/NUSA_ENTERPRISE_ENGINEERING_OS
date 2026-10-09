@@ -41,7 +41,8 @@ export default function MasterDataPage(){
  const [editingId,setEditingId]=useState("");
  const [query,setQuery]=useState("");
  const [loading,setLoading]=useState(true);
- const [saving,setSaving]=useState(false);\n const [seedingDemo,setSeedingDemo]=useState(false);
+ const [saving,setSaving]=useState(false);
+ const [seedingDemo,setSeedingDemo]=useState(false);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [newOrgName,setNewOrgName]=useState("");
