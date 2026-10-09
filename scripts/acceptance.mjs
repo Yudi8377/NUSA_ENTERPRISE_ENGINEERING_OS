@@ -116,6 +116,8 @@ assert(auraAvatar.includes('/operations/structural-analysis/'), "AURA voice navi
 assert(auraAvatar.includes('/erp/journals/'), "AURA voice navigation to finance submodules missing");
 assert(auraAvatar.includes('/erp/expenses/') && auraAvatar.includes('/erp/reports/'), "AURA voice navigation to expenses and financial reports missing");
 assert(auraAvatar.includes('aura-avatar-launcher'), "AURA must render as a floating voice avatar, not a data table/form");
+assert(auraAvatar.includes('aura-voice-orb-stage') && auraAvatar.includes('Mulai bicara'), "AURA voice-first avatar controls missing");
+assert(!auraAvatar.includes('aura-voice-compose') && !auraAvatar.includes('Tulis pertanyaan untuk AURA'), "AURA primary interface must not be a text-entry form");
 assert(layout.includes('AuraVoiceAvatar'), "AURA voice avatar must be mounted globally across NUSA routes");
 
 for (const key of ["leads","contacts","quotations","activities"]) assert(workspaceUi.includes(key+":"), "CRM contextual workflow missing: "+key);
