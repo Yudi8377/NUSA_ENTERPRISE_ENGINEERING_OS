@@ -135,9 +135,11 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
   const activeId=tenants.some(t=>t.id===tenantId)?tenantId:(tenants[0]?.id??"");
   setTenantId(activeId);
   if(!activeId){setRows([]);setProjectList([]);setEmployeeList([]);setProjectId("");setLoading(false);return;}
+  let recordQuery=supabase.from("nusa_workspace_records").select("id,project_id,record_type,record_code,title,description,status,amount,currency,data,created_at,updated_at").eq("tenant_id",activeId).eq("module_code",moduleCode).is("archived_at",null);
+  if(section)recordQuery=recordQuery.eq("record_type",activeRecordType);
   const [projectResult,result,employeeResult]=await Promise.all([
    getProjects(activeId),
-   supabase.from("nusa_workspace_records").select("id,project_id,record_type,record_code,title,description,status,amount,currency,data,created_at,updated_at").eq("tenant_id",activeId).eq("module_code",moduleCode).is("archived_at",null).order("updated_at",{ascending:false}).limit(100),
+   recordQuery.order("updated_at",{ascending:false}).limit(100),
    moduleCode==="hr" ? supabase.from("nusa_employees").select("id,employee_code,full_name,position_title,employment_status,project_id").eq("tenant_id",activeId).is("archived_at",null).order("full_name",{ascending:true}) : Promise.resolve({data:[],error:null})
   ]);
   if(projectResult.error)setError("Gagal memuat proyek: "+projectResult.error.message);
@@ -145,7 +147,7 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
   if(result.error)setError("Gagal memuat rekaman: "+result.error.message);else setRows((result.data??[]) as RecordRow[]);
   if(employeeResult.error)setError("Gagal memuat master pegawai: "+employeeResult.error.message);else setEmployeeList((employeeResult.data??[]) as EmployeeRow[]);
   setLoading(false);
- },[moduleCode,tenantId]);
+ },[moduleCode,tenantId,section,activeRecordType]);
  useEffect(()=>{const timer=window.setTimeout(()=>{void refresh();},0);return()=>window.clearTimeout(timer);},[refresh]);
  const visible=useMemo(()=>rows.filter(row=>[row.title,row.record_type,row.record_code??"",row.status,...config.summaryKeys.map(k=>fieldValue(row.data?.[k]))].join(" ").toLowerCase().includes(query.toLowerCase())),[rows,query,config.summaryKeys]);
  async function addRecord(event:FormEvent<HTMLFormElement>){
