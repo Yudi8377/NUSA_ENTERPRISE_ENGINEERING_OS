@@ -8,11 +8,13 @@ GitHub is the source/version-control/CI/CD/static-hosting plane. Supabase Free i
 
 - Quality Gate #112 for commit `3f45ef888339dcf59cdfbc1f5df2d70f838c741a`: PASS. Smoke test, acceptance test, lint and production build completed successfully.
 - GitHub Pages Deploy #109 for the same commit: build, static export, artifact upload and deployment steps completed successfully.
-- Supabase Security Advisor: zero findings returned in the latest check.
-- Applied Supabase migrations include core foundation, spatial/Pascal engine, governance hardening, enterprise workspace records, workspace transition/insert guards, workspace RLS/index hardening and reasoning RLS/initplan hardening.
+- Supabase Security Advisor: zero findings returned after the approval policy change.
+- Live schema inspection confirmed RLS is enabled on the inspected `nusa_*` public tables, including tenants, memberships, engineering runs, approvals, spatial, knowledge, and workspace records.
+- Applied Supabase migration history includes the core foundation, spatial/Pascal engine, governance hardening, enterprise workspace records, workspace transition/insert guards, workspace RLS/index hardening, reasoning RLS/initplan hardening, and `nusa_approval_reviewer_guard` (remote version `20261009005714`).
+- Approval decision UPDATE policy now limits decisions to tenant memberships with role `owner`, `admin`, `approver`, or `engineering_lead`, requires the decision actor to be the signed-in user, and prevents the requester from approving their own request.
 - Latest live database count check returned: auth users 0; tenants 0; memberships 0; workspace records 0; workspace events 0.
 
-These results verify automated build/deployment and the currently inspected database security advisor. They do **not** prove real-user sign-in, workspace creation, tenant isolation, or end-to-end transaction behavior.
+These results verify automated build/deployment, the currently inspected RLS configuration, and the current security advisor. They do **not** prove real-user sign-in, workspace creation, tenant isolation, or end-to-end transaction behavior.
 
 ## Release gates
 
@@ -21,12 +23,12 @@ These results verify automated build/deployment and the currently inspected data
 | Static quality: smoke, acceptance, lint, production build | PASS | GitHub Quality Gate #112 |
 | GitHub Pages deployment | PASS | GitHub Deploy #109 |
 | Supabase migrations | PASS for the currently listed migrations | Migration history reviewed; do not reset production database |
-| Supabase Security Advisor | PASS at last check | Re-run after schema/policy changes |
+| Supabase RLS and Security Advisor | PASS at last check | Re-run after schema/policy changes |
 | Real sign-up/sign-in | BLOCKED / NOT YET VERIFIED | Pilot user signs up and completes configured email verification |
 | First tenant/workspace onboarding | BLOCKED / NOT YET VERIFIED | Pilot user creates a workspace; membership is visible for that user |
 | Tenant isolation | NOT VERIFIED | Two distinct test tenants/users; prove cross-tenant read/write denied |
 | Workspace CRUD and audit trail | NOT VERIFIED against real sessions | Create/update/status transition; verify audit event and denied audit mutation |
-| High/critical engineering approval | Automated guard present; live E2E NOT VERIFIED | Attempt transition without approval (must fail), then approved human flow succeeds |
+| High/critical engineering approval | RLS reviewer policy and database guard present; live E2E NOT VERIFIED | Attempt transition without approval (must fail), then approved independent human flow succeeds |
 | Backup/export and restore drill | NOT VERIFIED | Export/backup, restore to a safe test target, compare counts/hashes |
 | Mobile/desktop UX and accessibility | PARTIAL / MANUAL | Test narrow and wide screens, keyboard flow, error states, and destructive confirmations |
 | Engineering bridge allowlist and signed evidence | IMPLEMENTATION/LOCAL INTEGRATION REVIEW REQUIRED | Verify only allowlisted local commands run; inspect provenance and signature validation |
@@ -39,14 +41,14 @@ These results verify automated build/deployment and the currently inspected data
 3. Create a pilot workspace with a non-sensitive name. Confirm the signed-in user is a member of that workspace and can see only its records.
 4. Use a second separately authenticated test identity and workspace to verify tenant boundaries in both directions. Do not use production personal data for this test.
 5. Create, edit and change a low-risk workspace record. Confirm its audit event appears and audit events cannot be edited/deleted by an ordinary member.
-6. Exercise the engineering run workflow with a non-critical test first. For high/critical runs, prove an unapproved transition is rejected by the database, then prove a designated human approval is recorded with actor and evidence.
+6. Exercise the engineering run workflow with a non-critical test first. For high/critical runs, prove an unapproved transition is rejected by the database, then prove a designated independent human approval is recorded with actor and evidence.
 7. Test sign-out, session expiry, failed requests, empty states, mobile layout, and unauthorized direct-route access.
 8. Perform a backup/export and a restore drill in a safe test target. Record date, operator, row counts, hashes, and any gaps.
 9. Re-run Quality Gate, deployment checks, and Supabase Security Advisor after any fixes. Record evidence and only then promote the release state to GREEN.
 
 ## Migration safety
 
-Remote Supabase migration history currently uses timestamped versions, while parts of the repository retain historical numbered migration filenames. Preserve the existing remote database. Do not reset, drop/recreate, or blindly replay old migrations to make filenames appear aligned. Before future schema changes, map each remote version to its committed SQL content, verify idempotency, and append a new forward-only migration with a unique timestamp.
+Remote Supabase migration history uses timestamped versions, while parts of the repository retain historical numbered migration filenames. Preserve the existing remote database. Do not reset, drop/recreate, or blindly replay old migrations to make filenames appear aligned. Before future schema changes, map each remote version to its committed SQL content, verify idempotency, and append a new forward-only migration with a unique timestamp.
 
 ## Free-tier controls
 
