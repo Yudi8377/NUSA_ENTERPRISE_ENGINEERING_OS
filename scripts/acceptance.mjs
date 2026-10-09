@@ -84,8 +84,8 @@ assert(auraPage.includes("AURA Integration Hub"), "AURA integration hub page mis
 assert(auraPage.includes("https://github.com/akvisomr-eng/AURA"), "official AURA source link missing");
 assert(auraPage.includes("tidak berpura-pura bahwa koneksi runtime langsung sudah aktif"), "AURA runtime boundary disclosure missing");
 assert(homePage.includes('["AURA Integration", Activity, "/aura/"]'), "AURA navigation entry missing");
-assert(masterUi.includes('Muat 25 data contoh'), "25-record demo loader action missing");
-assert(masterUi.includes('DEMO-PRJ-05') && masterUi.includes('DEMO-EMP-10') && masterUi.includes('DEMO-AST-10'), "sample master data definitions missing");
+assert(masterUi.includes('Muat data demo lengkap'), "detailed demo loader action missing");
+assert(masterUi.includes('DEMO-PRJ-10') && masterUi.includes('DEMO-EMP-10') && masterUi.includes('DEMO-AST-10'), "sample master data definitions missing");
 assert(masterUi.includes('created_by:userId,updated_by:userId'), "demo data must preserve authenticated actor audit fields");
 assert(masterUi.includes('NUSA Demo Engineering (DATA CONTOH)'), "empty tenant onboarding demo missing");
 assert(financeUi.includes('Bagan Akun'), "finance chart of accounts module missing");
