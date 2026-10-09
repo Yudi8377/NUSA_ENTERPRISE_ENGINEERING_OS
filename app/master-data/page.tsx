@@ -42,7 +42,8 @@ export default function MasterDataPage(){
  const [query,setQuery]=useState("");
  const [loading,setLoading]=useState(true);
  const [saving,setSaving]=useState(false);
- const [seedingDemo,setSeedingDemo]=useState(false);\n const [seedStep,setSeedStep]=useState("");
+ const [seedingDemo,setSeedingDemo]=useState(false);
+ const [seedStep,setSeedStep]=useState("");
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [newOrgName,setNewOrgName]=useState("");
@@ -146,7 +147,8 @@ export default function MasterDataPage(){
     targetTenantId=created.data.id;
     setTenantId(targetTenantId);
    }
-   setSeedStep("Menyiapkan proyek contoh…");\n   const projectSeed=[
+   setSeedStep("Menyiapkan proyek contoh…");
+   const projectSeed=[
     {code:"DEMO-PRJ-01",name:"Gedung Kantor NUSA",category:"building",status:"active",progress:35,budget:12500000000,target_date:"2027-06-30"},
     {code:"DEMO-PRJ-02",name:"Gudang dan Logistik",category:"industrial",status:"active",progress:20,budget:7800000000,target_date:"2027-09-30"},
     {code:"DEMO-PRJ-03",name:"Renovasi Fasilitas",category:"renovation",status:"on_hold",progress:10,budget:1850000000,target_date:"2027-03-31"},
@@ -166,7 +168,8 @@ export default function MasterDataPage(){
    const projectRows=(p.data??[]) as {id:string;code:string}[];
    if(projectRows.length<5)throw new Error("Belum tersedia 5 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
    const projectByCode=new Map(projectRows.map(x=>[x.code,x.id]));
-   setSeedStep("Proyek siap. Menyiapkan 10 pegawai…");\n   const employeeSeed=[
+   setSeedStep("Proyek siap. Menyiapkan 10 pegawai…");
+   const employeeSeed=[
     ["DEMO-EMP-01","Andi Pratama","Direktur Operasional"],
     ["DEMO-EMP-02","Siti Rahmawati","Project Manager"],
     ["DEMO-EMP-03","Bima Santoso","Site Engineer"],
@@ -191,7 +194,8 @@ export default function MasterDataPage(){
    const employeeRows=(e.data??[]) as {id:string;employee_code:string}[];
    if(employeeRows.length<10)throw new Error("Belum tersedia 10 pegawai contoh. Periksa izin HR organisasi lalu jalankan lagi.");
    const employeeByCode=new Map(employeeRows.map(x=>[x.employee_code,x.id]));
-   setSeedStep("Pegawai siap. Menyiapkan 10 aset…");\n   const assetSeed=[
+   setSeedStep("Pegawai siap. Menyiapkan 10 aset…");
+   const assetSeed=[
     ["DEMO-AST-01","Laptop Engineering 01","IT equipment",18500000,"Kantor pusat"],
     ["DEMO-AST-02","Laptop Engineering 02","IT equipment",18500000,"Kantor pusat"],
     ["DEMO-AST-03","Workstation CAD","IT equipment",32500000,"Studio desain"],
@@ -211,7 +215,8 @@ export default function MasterDataPage(){
     const inserted=await supabase.from("nusa_assets").insert(newAssets).select("id,asset_code");
     if(inserted.error)throw new Error("Gagal menambah aset contoh: "+inserted.error.message);
    }
-   setSeedStep("Memverifikasi 25 rekaman dan relasinya…");\n   const [pCount,eCount,aCount]=await Promise.all([
+   setSeedStep("Memverifikasi 25 rekaman dan relasinya…");
+   const [pCount,eCount,aCount]=await Promise.all([
     supabase.from("nusa_projects").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null),
     supabase.from("nusa_employees").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null),
     supabase.from("nusa_assets").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null)
@@ -219,10 +224,12 @@ export default function MasterDataPage(){
    if(pCount.error||eCount.error||aCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, dan aset.");
    if((pCount.count??0)<5||(eCount.count??0)<10||(aCount.count??0)<10)throw new Error("Sebagian data contoh belum lengkap. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
    setTab("projects");
-   setNotice("SELESAI — 25 record sintetis (data contoh) terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");\n   setSeedStep("Selesai — 25 rekaman sudah diverifikasi.");
+   setNotice("SELESAI — 25 record sintetis (data contoh) terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");
+   setSeedStep("Selesai — 25 rekaman sudah diverifikasi.");
    await refresh();
   }catch(err){
-   setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");\n   setSeedStep("Belum selesai — periksa pesan kesalahan lalu coba lagi.");
+   setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");
+   setSeedStep("Belum selesai — periksa pesan kesalahan lalu coba lagi.");
   }finally{
    setSeedingDemo(false);
   }
