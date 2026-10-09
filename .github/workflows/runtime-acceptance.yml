@@ -24,6 +24,30 @@ jobs:
           grep -qi "NUSA" /tmp/nusa.html
           grep -q "/NUSA_ENTERPRISE_ENGINEERING_OS/" /tmp/nusa.html
           echo "NUSA runtime HTML: PASS"
+      - name: Verify primary application routes
+        env:
+          BASE_URL: https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS
+        run: |
+          set -euo pipefail
+          check_route() {
+            route="$1"
+            marker="$2"
+            file="/tmp/nusa-route-$(echo "$route" | tr '/' '-' | tr -d '-')"
+            echo "Checking $route"
+            curl --fail --silent --show-error --location --retry 5 --retry-delay 3 --retry-all-errors --max-time 30 "$BASE_URL$route" -o "$file"
+            test -s "$file"
+            grep -qi "$marker" "$file"
+          }
+          check_route "/operations/" "Engineering Operations"
+          check_route "/projects/" "Projects"
+          check_route "/architecture/" "Architecture"
+          check_route "/erp/" "ERP"
+          check_route "/crm/" "CRM"
+          check_route "/hr/" "Payroll"
+          check_route "/procurement/" "Procurement"
+          check_route "/reports/" "Reports"
+          check_route "/grc/" "Compliance"
+          echo "Primary route checks: PASS (9 routes)"
       - name: Verify static assets referenced by HTML
         env:
           BASE_URL: https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/
