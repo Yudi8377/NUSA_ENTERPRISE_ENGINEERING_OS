@@ -79,8 +79,8 @@ export default function OperationsPage(){
  const decide=async(a:Approval,decision:"approved"|"rejected")=>{
   if(!currentUserId||!reviewerAllowed||a.requested_by===currentUserId){setNotice("Keputusan memerlukan reviewer berwenang yang bukan pemohon.");return;}
   setBusy(true);setNotice("");
-  const result=await supabase.from("nusa_approvals").update({status:decision,decided_by:currentUserId,decision_note:decision==="approved"?"Disetujui oleh reviewer berwenang":"Ditolak oleh reviewer berwenang",decided_at:new Date().toISOString()}).eq("id",a.id).eq("status","pending").select("id").single();
-  if(result.error)setNotice("Keputusan tidak tersimpan: "+result.error.message);else{setNotice(decision==="approved"?"Approval disetujui dan dicatat.":"Approval ditolak dan dicatat.");await refresh();}
+  const result=await supabase.rpc("nusa_decide_approval",{p_approval_id:a.id,p_decision:decision,p_decision_note:decision==="approved"?"Disetujui oleh reviewer berwenang":"Ditolak oleh reviewer berwenang"});
+  if(result.error)setNotice("Keputusan tidak tersimpan: "+result.error.message);else{setNotice(decision==="approved"?"Approval disetujui; status engineering run ikut diperbarui.":"Approval ditolak; status engineering run ikut diperbarui.");await refresh();}
   setBusy(false);
  };
 
