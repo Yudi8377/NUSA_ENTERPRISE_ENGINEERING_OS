@@ -85,7 +85,7 @@ export default function OperationsPage(){
  };
 
  return <main className="nusa gridbg nusa-ops"><section className="ops-shell">
-  <header className="ops-header"><Link href="/" className="ops-back"><ArrowLeft size={15}/> Command Center</Link><div className="ops-eyebrow">NUSA ENGINEERING CONTROL PLANE</div><h1 className="brand ops-title">Operations Studio</h1><p className="muted">Buat workflow engineering yang terikat ke organisasi dan proyek. Run berisiko tinggi tetap membutuhkan persetujuan manusia.</p></header>
+  <header className="ops-header"><Link href="/" aria-label="Kembali ke NUSA Command Center" className="command-center-button"><ArrowLeft size={15}/> Command Center</Link><div className="ops-eyebrow">NUSA ENGINEERING CONTROL PLANE</div><h1 className="brand ops-title">Operations Studio</h1><p className="muted">Buat workflow engineering yang terikat ke organisasi dan proyek. Run berisiko tinggi tetap membutuhkan persetujuan manusia.</p></header>
   {tenantList.length>0&&<div className="glass ops-card" style={{marginBottom:16,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
    <label>Organisasi<select value={tenantId} onChange={e=>{setTenantId(e.target.value);setProjectId("");}}><option value="">Pilih organisasi</option>{tenantList.map(t=><option key={t.id} value={t.id}>{t.name}{t.code?" · "+t.code:""}</option>)}</select></label>
    <label>Proyek terkait<select value={projectId} onChange={e=>setProjectId(e.target.value)}><option value="">Tanpa proyek spesifik</option>{projectList.map(p=><option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}</select></label>
