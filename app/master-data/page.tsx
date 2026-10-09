@@ -136,7 +136,7 @@ export default function MasterDataPage(){
  }
  async function seedDemoData(){
   if(!userId||seedingDemo||saving)return;
-  if(!window.confirm("Muat 25 data contoh SINTETIS ke organisasi aktif? Jika belum ada organisasi, NUSA akan membuat tenant bernama NUSA Demo Engineering. Data akan diberi kode DEMO dan dapat diarsipkan seperti data biasa."))return;
+  if(!window.confirm("Muat data contoh SINTETIS ke organisasi aktif: 10 proyek, 10 pegawai, 10 aset, payroll, dan ERP/Finance? Jika belum ada organisasi, NUSA akan membuat tenant bernama NUSA Demo Engineering. Data akan diberi kode DEMO dan dapat diarsipkan seperti data biasa."))return;
   setSeedingDemo(true);setError("");setNotice("");setSeedStep("Memeriksa organisasi dan sesi pengguna…");
   try{
    let targetTenantId=tenantId;
@@ -153,7 +153,12 @@ export default function MasterDataPage(){
     {code:"DEMO-PRJ-02",name:"Gudang dan Logistik",category:"industrial",status:"active",progress:20,budget:7800000000,target_date:"2027-09-30"},
     {code:"DEMO-PRJ-03",name:"Renovasi Fasilitas",category:"renovation",status:"on_hold",progress:10,budget:1850000000,target_date:"2027-03-31"},
     {code:"DEMO-PRJ-04",name:"Infrastruktur Kawasan",category:"infrastructure",status:"active",progress:48,budget:5600000000,target_date:"2027-12-15"},
-    {code:"DEMO-PRJ-05",name:"Workshop Engineering",category:"engineering",status:"active",progress:65,budget:2350000000,target_date:"2027-04-30"}
+    {code:"DEMO-PRJ-05",name:"Workshop Engineering",category:"engineering",status:"active",progress:65,budget:2350000000,target_date:"2027-04-30"},
+    {code:"DEMO-PRJ-06",name:"Pembangunan Klinik",category:"healthcare",status:"active",progress:28,budget:9200000000,target_date:"2027-10-31"},
+    {code:"DEMO-PRJ-07",name:"Sekolah Terpadu",category:"education",status:"active",progress:42,budget:14800000000,target_date:"2028-01-31"},
+    {code:"DEMO-PRJ-08",name:"Jembatan Akses",category:"infrastructure",status:"planning",progress:5,budget:6700000000,target_date:"2027-11-30"},
+    {code:"DEMO-PRJ-09",name:"Perumahan Tahap I",category:"residential",status:"active",progress:52,budget:22400000000,target_date:"2028-03-31"},
+    {code:"DEMO-PRJ-10",name:"Instalasi MEP Pabrik",category:"mep",status:"active",progress:31,budget:4850000000,target_date:"2027-08-31"}
    ];
    let p=await supabase.from("nusa_projects").select("id,code").eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null);
    if(p.error)throw new Error("Gagal memeriksa proyek contoh: "+p.error.message);
@@ -166,7 +171,7 @@ export default function MasterDataPage(){
    p=await supabase.from("nusa_projects").select("id,code").eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null);
    if(p.error)throw new Error("Gagal membaca proyek contoh: "+p.error.message);
    const projectRows=(p.data??[]) as {id:string;code:string}[];
-   if(projectRows.length<5)throw new Error("Belum tersedia 5 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
+   if(projectRows.length<10)throw new Error("Belum tersedia 10 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
    const projectByCode=new Map(projectRows.map(x=>[x.code,x.id]));
    setSeedStep("Proyek siap. Menyiapkan 10 pegawai…");
    const employeeSeed=[
@@ -184,7 +189,7 @@ export default function MasterDataPage(){
    let e=await supabase.from("nusa_employees").select("id,employee_code").eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null);
    if(e.error)throw new Error("Gagal memeriksa pegawai contoh: "+e.error.message);
    const knownEmployeeCodes=new Set((e.data??[]).map(x=>x.employee_code));
-   const newEmployees=employeeSeed.filter(x=>!knownEmployeeCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,employee_code:x[0],full_name:x[1],position_title:x[2],email:x[0].toLowerCase()+"@example.com",employment_status:"active",joined_on:"2026-01-05",project_id:projectByCode.get(projectSeed[i%5].code)??null,notes:"DATA CONTOH SINTETIS — bukan data pegawai nyata.",created_by:userId,updated_by:userId}));
+   const newEmployees=employeeSeed.filter(x=>!knownEmployeeCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,employee_code:x[0],full_name:x[1],position_title:x[2],email:x[0].toLowerCase()+"@example.com",employment_status:"active",joined_on:"2026-01-05",project_id:projectByCode.get(projectSeed[i%10].code)??null,notes:"DATA CONTOH SINTETIS — bukan data pegawai nyata.",created_by:userId,updated_by:userId}));
    if(newEmployees.length){
     const inserted=await supabase.from("nusa_employees").insert(newEmployees).select("id,employee_code");
     if(inserted.error)throw new Error("Gagal menambah pegawai contoh: "+inserted.error.message);
@@ -210,22 +215,47 @@ export default function MasterDataPage(){
    const a=await supabase.from("nusa_assets").select("id,asset_code").eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null);
    if(a.error)throw new Error("Gagal memeriksa aset contoh: "+a.error.message);
    const knownAssetCodes=new Set((a.data??[]).map(x=>x.asset_code));
-   const newAssets=assetSeed.filter(x=>!knownAssetCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,asset_code:x[0],name:x[1],category:x[2],condition_status:"good",asset_status:i<3?"assigned":"available",acquisition_date:"2026-01-12",acquisition_cost:x[3],location:x[4],project_id:projectByCode.get(projectSeed[i%5].code)??null,assigned_employee_id:employeeByCode.get(employeeSeed[i%10][0])??null,notes:"DATA CONTOH SINTETIS — nilai dan penempatan hanya untuk uji coba.",created_by:userId,updated_by:userId}));
+   const newAssets=assetSeed.filter(x=>!knownAssetCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,asset_code:x[0],name:x[1],category:x[2],condition_status:"good",asset_status:i<3?"assigned":"available",acquisition_date:"2026-01-12",acquisition_cost:x[3],location:x[4],project_id:projectByCode.get(projectSeed[i%10].code)??null,assigned_employee_id:employeeByCode.get(employeeSeed[i%10][0])??null,notes:"DATA CONTOH SINTETIS — nilai dan penempatan hanya untuk uji coba.",created_by:userId,updated_by:userId}));
    if(newAssets.length){
     const inserted=await supabase.from("nusa_assets").insert(newAssets).select("id,asset_code");
     if(inserted.error)throw new Error("Gagal menambah aset contoh: "+inserted.error.message);
    }
-   setSeedStep("Memverifikasi 25 rekaman dan relasinya…");
+   setSeedStep("Menyiapkan payroll dan transaksi ERP/Finance per proyek…");
+   const demoWorkspaceRecords:{record_code:string;project_id:string;module_code:"erp"|"hr";record_type:string;title:string;description:string;amount:number|null;status:"draft"|"open";data:Record<string,unknown>}[]=[];
+   for(let i=0;i<projectSeed.length;i++){
+    const project=projectSeed[i], projectId=projectByCode.get(project.code);
+    if(!projectId)throw new Error("Relasi proyek tidak ditemukan: "+project.code);
+    const n=String(i+1).padStart(2,"0");
+    const base={project_code:project.code,project_name:project.name,period:"2026-09",currency:"IDR",demo:true,notice:"DATA CONTOH SINTETIS — bukan data keuangan/payroll aktual."};
+    const salary=12500000+(i*850000);
+    demoWorkspaceRecords.push(
+     {record_code:"DEMO-PAY-"+n,project_id:projectId,module_code:"hr",record_type:"hr_payroll_control",title:"Payroll "+project.code+" — September 2026",description:"Kontrol payroll demo; bukan slip gaji atau perhitungan pajak final.",amount:salary*3,status:"draft",data:{...base,payroll_period:"2026-09",employee_count:3,gross_pay:salary*3,allowances:1500000+i*100000,deductions:500000+i*50000,net_pay:salary*3+1500000+i*100000-(500000+i*50000),currency:"IDR",approval_status:"Belum disetujui",calculation_note:"Contoh sederhana; PPh 21, BPJS, lembur dan potongan riil belum dihitung."}},
+     {record_code:"DEMO-BUD-"+n,project_id:projectId,module_code:"erp",record_type:"budget",title:"Baseline anggaran "+project.code,description:"Anggaran awal demo proyek; belum disahkan sebagai budget kontrol.",amount:project.budget,status:"draft",data:{...base,budget_code:"BUD-"+project.code,cost_center:project.code,period_start:"2026-01-01",period_end:project.target_date,budget_owner:"Project Manager",baseline_version:"0.1",contingency_percent:10}},
+     {record_code:"DEMO-AR-"+n,project_id:projectId,module_code:"erp",record_type:"receivable",title:"Piutang pelanggan "+project.code,description:"Invoice contoh untuk latihan alur piutang dan penagihan.",amount:Math.round(project.budget*0.08),status:"open",data:{...base,invoice_no:"INV-"+project.code,customer_name:"Klien Demo "+n,invoice_date:"2026-09-01",due_date:"2026-10-01",payment_status:"Terkirim",tax_status:"Perlu review",demo_invoice:true}},
+     {record_code:"DEMO-AP-"+n,project_id:projectId,module_code:"erp",record_type:"payable",title:"Tagihan vendor "+project.code,description:"Tagihan vendor sintetis; bukan instruksi pembayaran.",amount:Math.round(project.budget*0.035),status:"open",data:{...base,bill_no:"BILL-"+project.code,vendor_name:"Vendor Material Demo "+n,bill_date:"2026-09-03",due_date:"2026-10-15",verification_status:"Menunggu verifikasi",payment_instruction:"Tidak ada — data demo"}},
+     {record_code:"DEMO-EXP-"+n,project_id:projectId,module_code:"erp",record_type:"expense",title:"Biaya lapangan "+project.code,description:"Biaya operasional contoh untuk pengujian laporan proyek.",amount:Math.round(project.budget*0.012),status:"draft",data:{...base,expense_date:"2026-09-05",expense_category:"Operasional proyek",cost_center:project.code,claimant:"PIC Demo "+n,receipt_reference:"DEMO-KWT-"+n,review_status:"Draf"}}
+    );
+   }
+   const demoCodes=demoWorkspaceRecords.map(x=>x.record_code);
+   const existingWorkspace=await supabase.from("nusa_workspace_records").select("record_code").eq("tenant_id",targetTenantId).in("record_code",demoCodes);
+   if(existingWorkspace.error)throw new Error("Gagal memeriksa rekaman payroll/ERP: "+existingWorkspace.error.message);
+   const existingCodes=new Set((existingWorkspace.data??[]).map(x=>x.record_code));
+   const newWorkspace=demoWorkspaceRecords.filter(x=>!existingCodes.has(x.record_code)).map(x=>({...x,tenant_id:targetTenantId,currency:"IDR",created_by:userId,updated_by:userId}));
+   if(newWorkspace.length){
+    const inserted=await supabase.from("nusa_workspace_records").insert(newWorkspace);
+    if(inserted.error)throw new Error("Gagal menyimpan data payroll/ERP demo: "+inserted.error.message);
+   }
+   setSeedStep("Memverifikasi proyek, pegawai, aset, payroll, dan ERP/Finance…");
    const [pCount,eCount,aCount]=await Promise.all([
     supabase.from("nusa_projects").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null),
     supabase.from("nusa_employees").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null),
     supabase.from("nusa_assets").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null)
    ]);
    if(pCount.error||eCount.error||aCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, dan aset.");
-   if((pCount.count??0)<5||(eCount.count??0)<10||(aCount.count??0)<10)throw new Error("Sebagian data contoh belum lengkap. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
+   if((pCount.count??0)<10||(eCount.count??0)<10||(aCount.count??0)<10)throw new Error("Sebagian data contoh belum lengkap. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
    setTab("projects");
-   setNotice("SELESAI — 25 record sintetis (data contoh) terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");
-   setSeedStep("Selesai — 25 rekaman sudah diverifikasi.");
+   setNotice("SELESAI — data sintetis terverifikasi: "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset. Data terhubung ke organisasi dan relasi proyek/PIC di tenant yang sama.");
+   setSeedStep("Selesai — 10 proyek, SDM, aset, payroll, dan 40 rekaman ERP/Finance demo siap.");
    await refresh();
   }catch(err){
    setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");
