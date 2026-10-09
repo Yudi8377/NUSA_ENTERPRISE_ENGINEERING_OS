@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="grc" section="compliance" title="Compliance Obligations & Controls" eyebrow="GRC / COMPLIANCE OBLIGATIONS" description="Catat sumber kewajiban, control owner, frekuensi review, bukti wajib, dan status pemenuhan." recordType="grc_compliance_control" recordLabel="Kontrol kepatuhan"/>}
