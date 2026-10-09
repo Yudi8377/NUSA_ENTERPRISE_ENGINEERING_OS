@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="grc" section="audit" title="Audit Findings & CAPA" eyebrow="GRC / INTERNAL AUDIT" description="Dokumentasikan kriteria, bukti, klasifikasi temuan, pemilik corrective action, dan target penyelesaian." recordType="grc_audit_finding" recordLabel="Temuan audit"/>}
