@@ -1,2 +1,2 @@
-import EnterpriseWorkspace from "@/components/EnterpriseWorkspace";
+import EnterpriseWorkspace from "../../components/EnterpriseWorkspace";
 export default function Page(){return <EnterpriseWorkspace moduleCode="grc" title="GRC & Compliance" eyebrow="NUSA / GOVERNANCE, RISK & COMPLIANCE" description="Catat risiko, isu kepatuhan, tindakan mitigasi, bukti, dan tindak lanjut audit. Rekaman ini membantu pelacakan dan tidak menyatakan kepatuhan hukum secara otomatis." recordType="risk_compliance_item" recordLabel="Rekaman GRC"/>}
