@@ -111,6 +111,10 @@ assert(financeUi.includes('nusa_workspace_records'), "finance records must persi
 for (const route of ["chart-of-accounts","journals","general-ledger","cash-bank","receivables","payables","budgets","tax","reports"]) assert(read("app/erp/"+route+"/page.tsx").includes('FinanceWorkspace'), "finance route missing: "+route);
 
 assert(moduleHubUi.includes("Module control center"), "module hub must provide contextual process navigation");
+assert(auraAvatar.includes('/crm/leads/'), "AURA voice navigation to CRM submodules missing");
+assert(auraAvatar.includes('/operations/structural-analysis/'), "AURA voice navigation to engineering submodules missing");
+assert(auraAvatar.includes('/erp/journals/'), "AURA voice navigation to finance submodules missing");
+
 for (const key of ["leads","contacts","quotations","activities"]) assert(workspaceUi.includes(key+":"), "CRM contextual workflow missing: "+key);
 for (const key of ["recruitment","attendance","training","payroll"]) assert(workspaceUi.includes(key+":"), "HR contextual workflow missing: "+key);
 for (const key of ["requests","vendors","orders","inventory"]) assert(workspaceUi.includes(key+":"), "Procurement contextual workflow missing: "+key);
