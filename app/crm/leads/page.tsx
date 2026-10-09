@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="crm" section="leads" title="Lead & Opportunity Pipeline" eyebrow="CRM / SALES PIPELINE" description="Kelola sumber prospek, kualifikasi, industri, probabilitas, nilai pipeline, dan tindak lanjut. Tahap Won/Lost harus didukung hasil komersial." recordType="crm_lead" recordLabel="Prospek"/>}
