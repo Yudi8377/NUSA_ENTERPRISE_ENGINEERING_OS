@@ -2,6 +2,7 @@ import { supabase } from "./supabase";
 
 export type EngineeringRun = {
   id: string;
+  project_id: string | null;
   run_type: string;
   status: string;
   criticality: string;
@@ -16,6 +17,10 @@ export type Approval = {
   status: string;
   created_at: string;
   decided_at: string | null;
+  requested_by: string | null;
+  project_id: string | null;
+  run_id: string | null;
+  decision_note: string | null;
 };
 
 export type IngestionJob = {
@@ -31,7 +36,7 @@ export type IngestionJob = {
 export async function engineeringRuns(tenantId: string) {
   return supabase
     .from("nusa_engineering_runs")
-    .select("id,run_type,status,criticality,agent_code,created_at,updated_at")
+    .select("id,project_id,run_type,status,criticality,agent_code,created_at,updated_at")
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
     .limit(8);
@@ -40,7 +45,7 @@ export async function engineeringRuns(tenantId: string) {
 export async function approvals(tenantId: string) {
   return supabase
     .from("nusa_approvals")
-    .select("id,approval_type,status,created_at,decided_at")
+    .select("id,approval_type,status,created_at,decided_at,requested_by,project_id,run_id,decision_note")
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
     .limit(8);
@@ -75,7 +80,7 @@ export async function createEngineeringRun(input: {
       criticality: input.criticality ?? "normal",
       input: input.payload ?? {},
     })
-    .select("id,run_type,status,criticality,agent_code,created_at,updated_at")
+    .select("id,project_id,run_type,status,criticality,agent_code,created_at,updated_at")
     .single();
 
   if (error) return { data: null, error };

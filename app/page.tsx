@@ -10,7 +10,7 @@ import { retrieveKnowledge } from "../lib/knowledge";
 import { approvals, engineeringRuns, ingestionJobs } from "../lib/operations";
 
 const modules = [
-  ["Command Center", Command, "/"],["Projects & Construction", Building2, "/projects/"],["Engineering & SAP2000", Activity, "/operations/"],
+  ["Command Center", Command, "/"],["Master Data", Building2, "/master-data/"],["Projects & Construction", Building2, "/projects/"],["Engineering & SAP2000", Activity, "/operations/"],
   ["Architecture / CAD / BIM", Layers3, "/architecture/"],["ERP & Finance", CircleDollarSign, "/erp/"],["CRM", Users, "/crm/"],
   ["HRD & Payroll", Users, "/hr/"],["Procurement & Asset", ClipboardCheck, "/procurement/"],["Reports & Forecast", BarChart3, "/reports/"],["GRC & Compliance", ShieldCheck, "/grc/"],
 ] as const;
@@ -106,12 +106,12 @@ export default function Home() {
   const critical=agents.filter(a=>a.risk_level==="critical").length;
   const pendingApprovals=approvalList.filter(a=>a.status==="pending").length;
 
-  return <main className="nusa gridbg">
+  return <main className="nusa nusa-home gridbg">
     <div style={{display:"grid",gridTemplateColumns:open?"272px 1fr":"72px 1fr",minHeight:"100vh"}}>
-      <aside className="glass" style={{padding:18,position:"sticky",top:0,height:"100vh",zIndex:5}}>
+      <aside className={"glass nusa-sidebar "+(open?"is-open":"is-closed")} style={{padding:18,position:"sticky",top:0,height:"100vh",zIndex:5}}>
         <button onClick={()=>setOpen(!open)} aria-label="Navigasi" style={{background:"none",border:0,color:"white",cursor:"pointer"}}>{open?<PanelLeft/>:<Menu/>}</button>
         {open&&<><div style={{margin:"22px 4px 28px"}}><div className="brand" style={{fontSize:23,fontWeight:700}}>NUSA</div><div className="muted" style={{fontSize:12}}>ENTERPRISE ENGINEERING OS</div></div>
-        {modules.map(([name,Icon,href])=><Link key={name} href={href} style={{display:"flex",gap:11,alignItems:"center",padding:"11px 8px",borderRadius:10,color:"#b9c9c1",fontSize:13,textDecoration:"none"}}><Icon size={17}/>{name}</Link>)}
+        {modules.map(([name,Icon,href])=><Link key={name} href={href} onClick={()=>setOpen(false)} style={{display:"flex",gap:11,alignItems:"center",padding:"11px 8px",borderRadius:10,color:"#b9c9c1",fontSize:13,textDecoration:"none"}}><Icon size={17}/>{name}</Link>)}
         <div style={{marginTop:20,padding:12,borderTop:"1px solid #20352d",fontSize:11}} className="muted">PHASE 0 → GO LIVE<br/>Parallel workstreams active</div></>}
       </aside>
 
@@ -120,7 +120,7 @@ export default function Home() {
           <div><div className="muted" style={{fontSize:12}}>NUSA CONTROL PLANE / FREE-FIRST PRODUCTION</div><h1 className="brand" style={{fontSize:30,margin:"5px 0"}}>Enterprise Command Center</h1><div className="muted" style={{fontSize:12}}>Evidence-first · Indonesian-first · Human approval for critical engineering</div></div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             {user?<><span className="muted" style={{fontSize:12}}>{user.email}</span><button onClick={()=>supabase.auth.signOut()} className="glass" style={{padding:"10px 14px",color:"#dcebe4",borderRadius:10,border:0}}>Keluar</button></>:<button onClick={()=>setAuthOpen(true)} style={{background:"#d8f5df",color:"#0b2116",border:0,borderRadius:10,padding:"10px 15px",fontWeight:700,display:"flex",gap:8,alignItems:"center"}}><LogIn size={16}/> Masuk NUSA</button>}
-            <button className="glass" style={{padding:"10px 14px",color:"#dcebe4",borderRadius:10,border:0}}><FileText size={16}/></button>
+            <button onClick={()=>window.print()} title="Cetak Command Center" aria-label="Cetak Command Center" className="glass" style={{padding:"10px 14px",color:"#dcebe4",borderRadius:10,border:0,cursor:"pointer"}}><FileText size={16}/></button>
           </div>
         </header>
 
