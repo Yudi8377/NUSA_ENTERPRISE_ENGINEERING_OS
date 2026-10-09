@@ -283,6 +283,35 @@ export default function MasterDataPage(){
     const inserted=await supabase.from("nusa_workspace_records").insert(newWorkspace);
     if(inserted.error)throw new Error("Gagal menyimpan data payroll/ERP demo: "+inserted.error.message);
    }
+   setSeedStep("Menyiapkan attendance terverifikasi dan profil kompensasi terbatas…");
+   const attendanceCodes=employeeSeed.map(x=>"DEMO-ATT-"+x[0].slice(-2));
+   const existingAttendance=await supabase.from("nusa_workspace_records").select("record_code").eq("tenant_id",targetTenantId).eq("module_code","hr").eq("record_type","hr_attendance").in("record_code",attendanceCodes);
+   if(existingAttendance.error)throw new Error("Gagal memeriksa attendance demo: "+existingAttendance.error.message);
+   const knownAttendance=new Set((existingAttendance.data??[]).map(x=>x.record_code));
+   const attendanceRows=employeeSeed.filter(x=>!knownAttendance.has("DEMO-ATT-"+x[0].slice(-2))).map((x,i)=>({tenant_id:targetTenantId,project_id:projectByCode.get(projectSeed[i%projectSeed.length].code)??null,module_code:"hr",record_type:"hr_attendance",record_code:"DEMO-ATT-"+x[0].slice(-2),title:"Timesheet "+x[0]+" — September 2026",description:"Attendance demo sintetis; tidak mewakili data kehadiran aktual.",status:"open",amount:null,currency:"IDR",data:{employee_code:x[0],period_start:"2026-09-01",period_end:"2026-09-30",shift:i%3===0?"Shift 1":"Reguler",worked_days:22,approved_overtime_hours:i%4===0?8:4,sick_leave_days:i%3===0?1:0,unpaid_leave_days:0,attendance_source:"Timesheet proyek",supervisor:"Supervisor Demo",attendance_status:"Terverifikasi",demo:true,schema_version:1},created_by:userId,updated_by:userId}));
+   if(attendanceRows.length){const inserted=await supabase.from("nusa_workspace_records").insert(attendanceRows);if(inserted.error)throw new Error("Gagal menambah attendance demo: "+inserted.error.message);}
+   const compRows=await supabase.from("nusa_employee_compensation").select("employee_id,effective_from").eq("tenant_id",targetTenantId).in("employee_id",employeeRows.map(x=>x.id));
+   if(compRows.error)throw new Error("Gagal memeriksa profil kompensasi demo: "+compRows.error.message);
+   const knownComp=new Set((compRows.data??[]).map(x=>x.employee_id+"|"+x.effective_from));
+   const compensationSeed=employeeSeed.map((x,i)=>{const employeeId=employeeByCode.get(x[0]);return {tenant_id:targetTenantId,employee_id:employeeId,effective_from:"2026-09-01",effective_to:null,base_salary:9000000+i*750000,fixed_allowance:1000000,position_allowance:i<2?2500000:750000,overtime_rate:75000,currency:"IDR",policy_reference:"DEMO-COMP-2026 — data sintetis untuk uji alur",status:"active",created_by:userId,updated_by:userId};}).filter(x=>x.employee_id&&!knownComp.has(x.employee_id+"|"+x.effective_from));
+   if(compensationSeed.length){const inserted=await supabase.from("nusa_employee_compensation").insert(compensationSeed);if(inserted.error)throw new Error("Gagal menambah profil kompensasi demo: "+inserted.error.message);}
+   setSeedStep("Menyiapkan payroll run demo yang terhubung ke attendance dan kompensasi…");
+   let payrollRun=await supabase.from("nusa_payroll_runs").select("id,status").eq("tenant_id",targetTenantId).eq("period_code","2026-09").maybeSingle();
+   if(payrollRun.error)throw new Error("Gagal memeriksa payroll run demo: "+payrollRun.error.message);
+   if(!payrollRun.data){payrollRun=await supabase.from("nusa_payroll_runs").insert({tenant_id:targetTenantId,period_code:"2026-09",period_start:"2026-09-01",period_end:"2026-09-30",status:"draft",prepared_by:userId,notes:"DATA CONTOH SINTETIS — verifikasi aturan payroll sebelum digunakan."}).select("id,status").single();if(payrollRun.error)throw new Error("Gagal membuat payroll run demo: "+payrollRun.error.message);}
+   if(!payrollRun.data?.id)throw new Error("Payroll run demo tidak memiliki ID.");
+   const runId=payrollRun.data.id;
+   const attendanceLookup=await supabase.from("nusa_workspace_records").select("id,record_code,data").eq("tenant_id",targetTenantId).eq("module_code","hr").eq("record_type","hr_attendance").in("record_code",attendanceCodes);
+   if(attendanceLookup.error)throw new Error("Gagal membaca attendance payroll demo: "+attendanceLookup.error.message);
+   const attendanceByCode=new Map((attendanceLookup.data??[]).map(x=>[x.record_code,{id:x.id,data:x.data as Record<string,unknown>}]));
+   const compLookup=await supabase.from("nusa_employee_compensation").select("employee_id,base_salary,fixed_allowance,position_allowance,overtime_rate").eq("tenant_id",targetTenantId).in("employee_id",employeeRows.map(x=>x.id)).eq("effective_from","2026-09-01");
+   if(compLookup.error)throw new Error("Gagal membaca kompensasi payroll demo: "+compLookup.error.message);
+   const compByEmployee=new Map((compLookup.data??[]).map(x=>[x.employee_id,x]));
+   const existingLines=await supabase.from("nusa_payroll_lines").select("employee_id").eq("tenant_id",targetTenantId).eq("payroll_run_id",runId);
+   if(existingLines.error)throw new Error("Gagal memeriksa rincian payroll demo: "+existingLines.error.message);
+   const knownLines=new Set((existingLines.data??[]).map(x=>x.employee_id));
+   const payrollLineSeed=employeeRows.slice(0,5).filter(emp=>!knownLines.has(emp.id)).map((emp,i)=>{const comp=compByEmployee.get(emp.id);const att=attendanceByCode.get("DEMO-ATT-"+emp.employee_code.slice(-2));const overtimeHours=Number(att?.data?.approved_overtime_hours??0);const overtimePay=Math.round(overtimeHours*Number(comp?.overtime_rate??0));const base=Number(comp?.base_salary??0),fixed=Number(comp?.fixed_allowance??0),position=Number(comp?.position_allowance??0),bonus=i%2===0?300000:0,incentive=250000,thr=0,gross=base+fixed+position+overtimePay+bonus+incentive+thr,bpjsHealth=150000,bpjsEmployment=250000,pph21=500000,other=0,net=gross-bpjsHealth-bpjsEmployment-pph21-other;return {tenant_id:targetTenantId,payroll_run_id:runId,employee_id:emp.id,attendance_record_id:att?.id??null,base_salary:base,fixed_allowance:fixed,position_allowance:position,overtime_hours:overtimeHours,overtime_rate:Number(comp?.overtime_rate??0),overtime_pay:overtimePay,bonus,incentive,thr,sick_leave_days:Number(att?.data?.sick_leave_days??0),unpaid_leave_days:Number(att?.data?.unpaid_leave_days??0),unpaid_leave_deduction:0,bpjs_health_employee:bpjsHealth,bpjs_employment_employee:bpjsEmployment,pph21,other_deductions:other,gross_pay:gross,net_pay:net,calculation_version:"demo-synthetic-v1",calculation_notes:"DATA DEMO: nilai BPJS/PPh21 ilustratif, bukan hasil perhitungan resmi.",created_by:userId,updated_by:userId};});
+   if(payrollLineSeed.length){const inserted=await supabase.from("nusa_payroll_lines").insert(payrollLineSeed);if(inserted.error)throw new Error("Gagal membuat rincian payroll demo: "+inserted.error.message);}
    setSeedStep("Memverifikasi proyek, pegawai, aset, payroll, dan ERP/Finance…");
    const [pCount,eCount,aCount,wCount]=await Promise.all([
     supabase.from("nusa_projects").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null),
@@ -293,8 +322,8 @@ export default function MasterDataPage(){
    if(pCount.error||eCount.error||aCount.error||wCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, aset, dan ERP/Finance.");
    if((pCount.count??0)!==5||(eCount.count??0)<10||(aCount.count??0)<10||(wCount.count??0)<25)throw new Error("Data demo belum lengkap. Target: 5 proyek, 10 pegawai, 10 aset, 20 rekaman ERP/Finance, dan 5 kontrol payroll. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
    setTab("projects");
-   setNotice("SELESAI — "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset contoh terverifikasi (target 25 data master). Tersedia "+wCount.count+" rekaman ERP/Finance dan payroll sintetis. Semua terkait ke organisasi dan relasi proyek/PIC pada tenant yang sama.");
-   setSeedStep("Selesai — 25 data master dan 25 rekaman ERP/Finance + payroll siap.");
+   setNotice("SELESAI — "+pCount.count+" proyek, "+eCount.count+" pegawai, dan "+aCount.count+" aset contoh terverifikasi (target 25 data master). Tersedia 20 rekaman ERP/Finance, 5 kontrol payroll, attendance demo, profil kompensasi terbatas, dan payroll run sintetis yang terhubung. Semua data demo ditandai dan terkait ke tenant yang sama.");
+   setSeedStep("Selesai — 25 data master, 25 rekaman ERP/Finance + payroll, attendance dan payroll run sintetis siap.");
    await refresh();
   }catch(err){
    setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");
