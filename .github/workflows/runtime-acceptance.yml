@@ -40,6 +40,7 @@ jobs:
           }
           check_route "/operations/" "Operations Studio"
           check_route "/projects/" "Projects"
+          check_route "/master-data/" "Master Data"
           check_route "/architecture/" "Architecture"
           check_route "/erp/" "ERP"
           check_route "/crm/" "CRM"
@@ -47,7 +48,7 @@ jobs:
           check_route "/procurement/" "Procurement"
           check_route "/reports/" "Reports"
           check_route "/grc/" "Compliance"
-          echo "Primary route checks: PASS (9 routes)"
+          echo "Primary route checks: PASS (10 routes)"
       - name: Verify static assets referenced by HTML
         env:
           BASE_URL: https://yudi8377.github.io/NUSA_ENTERPRISE_ENGINEERING_OS/
