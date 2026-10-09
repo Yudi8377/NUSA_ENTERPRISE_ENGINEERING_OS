@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="grc" section="risks" title="Enterprise Risk Register" eyebrow="GRC / ENTERPRISE RISK" description="Catat risk event, risk owner, likelihood, impact, residual risk, dan mitigasi. Nilai risiko tetap memerlukan penilaian pemilik risiko." recordType="grc_risk" recordLabel="Risiko"/>}
