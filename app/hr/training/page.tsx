@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="hr" section="training" title="Training & Competency" eyebrow="HR / LEARNING & DEVELOPMENT" description="Rencanakan program kompetensi, penyelenggara, jadwal, anggaran, dan metode evaluasi." recordType="hr_training" recordLabel="Program pelatihan"/>}
