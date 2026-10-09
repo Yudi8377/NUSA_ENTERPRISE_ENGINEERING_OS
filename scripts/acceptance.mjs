@@ -154,7 +154,7 @@ assert(workspaceUi.includes("Cetak / PDF"), "enterprise workspace print action m
 assert(workspaceUi.includes("updateStatus(row,\"archived\")"), "enterprise workspace archive action missing");
 
 const blueprint = read("docs/ENTERPRISE_MANAGEMENT_BLUEPRINT.md");
-const payrollSchema = read("supabase/migrations/20261009190000_nusa_restricted_payroll.sql");
+const payrollSchema = read("supabase/migrations/20261009122455_nusa_restricted_payroll.sql");
 const payrollUi = read("components/PayrollWorkspace.tsx");
 assert(blueprint.includes("three-way match") && blueprint.includes("Business continuity") && blueprint.includes("ISO 19650"), "enterprise blueprint lacks cross-functional controls or standards mapping");
 assert(read("app/system-blueprint/page.tsx").includes("/procurement/"), "enterprise blueprint route missing supply-chain links");
