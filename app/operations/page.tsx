@@ -13,7 +13,9 @@ type Run = { id:string; project_id:string|null; run_type:string; status:string; 
 type Approval = { id:string; approval_type:string; status:string; created_at:string; requested_by:string|null; project_id:string|null; run_id:string|null; decision_note:string|null; decided_at:string|null };
 
 export default function OperationsPage(){
- const [currentUserId,setCurrentUserId]=useState("");\n const [reviewerAllowed,setReviewerAllowed]=useState(false);\n const [tenantList,setTenantList]=useState<Tenant[]>([]);
+ const [currentUserId,setCurrentUserId]=useState("");
+ const [reviewerAllowed,setReviewerAllowed]=useState(false);
+ const [tenantList,setTenantList]=useState<Tenant[]>([]);
  const [tenant,setTenant]=useState<Tenant|null>(null);
  const [tenantId,setTenantId]=useState("");
  const [projectList,setProjectList]=useState<Project[]>([]);
@@ -30,7 +32,8 @@ export default function OperationsPage(){
  const refresh=useCallback(async()=>{
   setLoading(true);
   const u=await currentUser();
-  if(!u){setCurrentUserId("");setReviewerAllowed(false);setTenant(null);setTenantList([]);setProjectList([]);setRuns([]);setApprovalRows([]);setNotice("Masuk ke NUSA untuk menjalankan engineering workflow.");setLoading(false);return;}\n  setCurrentUserId(u.id);
+  if(!u){setCurrentUserId("");setReviewerAllowed(false);setTenant(null);setTenantList([]);setProjectList([]);setRuns([]);setApprovalRows([]);setNotice("Masuk ke NUSA untuk menjalankan engineering workflow.");setLoading(false);return;}
+  setCurrentUserId(u.id);
   const t=await myTenants();
   if(t.error){setNotice("Organisasi gagal dimuat: "+t.error.message);setLoading(false);return;}
   const list=(t.data??[]) as Tenant[];
@@ -40,7 +43,8 @@ export default function OperationsPage(){
   const selected=list.find(x=>x.id===activeId)??null;
   setTenant(selected);
   if(!selected){setProjectList([]);setProjectId("");setRuns([]);setApprovalRows([]);setNotice("Belum ada organisasi. Buat organisasi dan proyek dari Master Data.");setLoading(false);return;}
-  const [p,r,a,membership]=await Promise.all([getProjects(selected.id),engineeringRuns(selected.id),approvals(selected.id),supabase.from("nusa_memberships").select("role_code").eq("tenant_id",selected.id).eq("user_id",u.id).maybeSingle()]);\n  setReviewerAllowed(!membership.error&&["owner","admin","approver","engineering_lead"].includes(String(membership.data?.role_code??"").toLowerCase()));
+  const [p,r,a,membership]=await Promise.all([getProjects(selected.id),engineeringRuns(selected.id),approvals(selected.id),supabase.from("nusa_memberships").select("role_code").eq("tenant_id",selected.id).eq("user_id",u.id).maybeSingle()]);
+  setReviewerAllowed(!membership.error&&["owner","admin","approver","engineering_lead"].includes(String(membership.data?.role_code??"").toLowerCase()));
   if(p.error){setNotice("Proyek gagal dimuat: "+p.error.message);setProjectList([]);setProjectId("");}
   else{
    const ps=(p.data??[]) as Project[];
@@ -71,7 +75,14 @@ export default function OperationsPage(){
   else{setNotice(criticality==="normal"?"Engineering run tercatat pada proyek terpilih.":"Engineering run tercatat pada proyek terpilih dan human approval dibuat otomatis.");await refresh();}
   setBusy(false);
  };
- const pending=approvalRows.filter(a=>a.status==="pending").length;\n const decide=async(a:Approval,decision:"approved"|"rejected")=>{\n  if(!currentUserId||!reviewerAllowed||a.requested_by===currentUserId){setNotice("Keputusan memerlukan reviewer berwenang yang bukan pemohon.");return;}\n  setBusy(true);setNotice("");\n  const result=await supabase.from("nusa_approvals").update({status:decision,decided_by:currentUserId,decision_note:decision==="approved"?"Disetujui oleh reviewer berwenang":"Ditolak oleh reviewer berwenang",decided_at:new Date().toISOString()}).eq("id",a.id).eq("status","pending").select("id").single();\n  if(result.error)setNotice("Keputusan tidak tersimpan: "+result.error.message);else{setNotice(decision==="approved"?"Approval disetujui dan dicatat.":"Approval ditolak dan dicatat.");await refresh();}\n  setBusy(false);\n };
+ const pending=approvalRows.filter(a=>a.status==="pending").length;
+ const decide=async(a:Approval,decision:"approved"|"rejected")=>{
+  if(!currentUserId||!reviewerAllowed||a.requested_by===currentUserId){setNotice("Keputusan memerlukan reviewer berwenang yang bukan pemohon.");return;}
+  setBusy(true);setNotice("");
+  const result=await supabase.from("nusa_approvals").update({status:decision,decided_by:currentUserId,decision_note:decision==="approved"?"Disetujui oleh reviewer berwenang":"Ditolak oleh reviewer berwenang",decided_at:new Date().toISOString()}).eq("id",a.id).eq("status","pending").select("id").single();
+  if(result.error)setNotice("Keputusan tidak tersimpan: "+result.error.message);else{setNotice(decision==="approved"?"Approval disetujui dan dicatat.":"Approval ditolak dan dicatat.");await refresh();}
+  setBusy(false);
+ };
 
  return <main className="nusa gridbg nusa-ops"><section className="ops-shell">
   <header className="ops-header"><Link href="/" className="ops-back"><ArrowLeft size={15}/> Command Center</Link><div className="ops-eyebrow">NUSA ENGINEERING CONTROL PLANE</div><h1 className="brand ops-title">Operations Studio</h1><p className="muted">Buat workflow engineering yang terikat ke organisasi dan proyek. Run berisiko tinggi tetap membutuhkan persetujuan manusia.</p></header>
