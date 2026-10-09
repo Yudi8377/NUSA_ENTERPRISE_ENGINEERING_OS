@@ -13,6 +13,7 @@ const smoke = read("scripts/smoke.mjs");
 const master = read("supabase/migrations/20261009012000_nusa_master_data_crud.sql");
 const onboarding = read("supabase/migrations/20261009014000_nusa_workspace_onboarding_invoker.sql");
 const masterPage = read("app/master-data/page.tsx");
+const operationsPage = read("app/operations/page.tsx");
 
 assert(governance.includes("status text not null default 'queued' check(status in ('queued','running','review','approved','rejected','completed','failed','cancelled'))"), "engineering run status enum missing");
 assert(governance.includes("criticality text not null default 'normal' check(criticality in ('normal','high','critical'))"), "engineering criticality enum missing");
@@ -50,5 +51,9 @@ assert(onboarding.includes("revoke all on function public.nusa_create_workspace"
 assert(masterPage.includes("createOrganization"), "organization onboarding action missing");
 assert(masterPage.includes("async function submit"), "master data create/update action missing");
 assert(masterPage.includes("async function archive"), "master data archive action missing");
+assert(operationsPage.includes("reviewerAllowed"), "reviewer authorization state missing");
+assert(operationsPage.includes("Setujui"), "approval decision action missing");
+assert(operationsPage.includes("Tolak"), "approval rejection action missing");
+assert(operationsPage.includes("decided_by:currentUserId"), "approval decision actor must be recorded");
 
 console.log("NUSA operational acceptance static assertions: PASS");
