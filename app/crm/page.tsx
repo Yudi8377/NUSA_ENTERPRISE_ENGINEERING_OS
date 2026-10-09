@@ -1,2 +1,2 @@
-import EnterpriseWorkspace from "@/components/EnterpriseWorkspace";
+import EnterpriseWorkspace from "../../components/EnterpriseWorkspace";
 export default function Page(){return <EnterpriseWorkspace moduleCode="crm" title="CRM & Sales" eyebrow="NUSA / CUSTOMER RELATIONSHIP" description="Kelola prospek, peluang, tindak lanjut pelanggan, penawaran, dan catatan hubungan secara tenant-scoped." recordType="customer_opportunity" recordLabel="Peluang pelanggan"/>}
