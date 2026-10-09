@@ -84,8 +84,8 @@ assert(auraPage.includes("AURA Integration Hub"), "AURA integration hub page mis
 assert(auraPage.includes("https://github.com/akvisomr-eng/AURA"), "official AURA source link missing");
 assert(auraPage.includes("tidak berpura-pura bahwa koneksi runtime langsung sudah aktif"), "AURA runtime boundary disclosure missing");
 assert(homePage.includes('["AURA Integration", Activity, "/aura/"]'), "AURA navigation entry missing");
-assert(masterUi.includes('Muat 25 data contoh'), "25-record demo loader action missing");
-assert(masterUi.includes('DEMO-PRJ-05') && masterUi.includes('DEMO-EMP-10') && masterUi.includes('DEMO-AST-10'), "sample master data definitions missing");
+assert(masterUi.includes('Muat data demo lengkap'), "detailed demo loader action missing");
+assert(masterUi.includes('DEMO-PRJ-10') && masterUi.includes('DEMO-EMP-10') && masterUi.includes('DEMO-AST-10'), "sample master data definitions missing");
 assert(masterUi.includes('created_by:userId,updated_by:userId'), "demo data must preserve authenticated actor audit fields");
 assert(masterUi.includes('NUSA Demo Engineering (DATA CONTOH)'), "empty tenant onboarding demo missing");
 assert(financeUi.includes('Bagan Akun'), "finance chart of accounts module missing");
@@ -132,4 +132,19 @@ for (const route of ["requests","vendors","orders","inventory"]) assert(read("ap
 for (const route of ["kpi","forecast","packs","scenarios"]) assert(read("app/reports/"+route+"/page.tsx").includes('section="'+route+'"'), "Reports route missing: "+route);
 for (const route of ["risks","audit","compliance","incidents"]) assert(read("app/grc/"+route+"/page.tsx").includes('section="'+route+'"'), "GRC route missing: "+route);
 
+const projectDemo = read("app/master-data/page.tsx");
+assert(projectDemo.includes('code:"DEMO-PRJ-10"'), "demo portfolio must include at least ten projects");
+assert(projectDemo.includes('record_code:"DEMO-PAY-"+n'), "demo portfolio must include payroll records");
+assert(projectDemo.includes('record_code:"DEMO-BUD-"+n') && projectDemo.includes('record_code:"DEMO-AR-"+n') && projectDemo.includes('record_code:"DEMO-AP-"+n') && projectDemo.includes('record_code:"DEMO-EXP-"+n'), "demo portfolio must include linked ERP finance registers");
+assert(projectDemo.includes('PROJECT DOSSIER') && projectDemo.includes('openProjectDetail'), "project detail dossier action missing");
+assert(projectDemo.includes('Cetak / PDF') && projectDemo.includes('openMasterDetail'), "master data detail and print actions missing");
+assert(projectDemo.includes('wCount.count??0)<50'), "sample seed must verify all 50 payroll/finance records");
+assert(financeUi.includes('async function archiveRecord'), "finance record archive action missing");
+assert(financeUi.includes('function startEdit(row:Row)'), "finance record edit action missing");
+assert(financeUi.includes('setDetailRow(r)'), "finance record detail view action missing");
+assert(financeUi.includes('Cetak / PDF'), "finance record print action missing");
+assert(workspaceUi.includes("function startEdit(row:RecordRow)"), "enterprise workspace edit action missing");
+assert(workspaceUi.includes("setDetailRow(row)"), "enterprise workspace detail view missing");
+assert(workspaceUi.includes("Cetak / PDF"), "enterprise workspace print action missing");
+assert(workspaceUi.includes("updateStatus(row,\"archived\")"), "enterprise workspace archive action missing");
 console.log("NUSA operational acceptance static assertions: PASS");
