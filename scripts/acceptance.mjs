@@ -156,6 +156,8 @@ assert(workspaceUi.includes("updateStatus(row,\"archived\")"), "enterprise works
 const blueprint = read("docs/ENTERPRISE_MANAGEMENT_BLUEPRINT.md");
 const payrollSchema = read("supabase/migrations/20261009122455_nusa_restricted_payroll.sql");
 const compensationSchema = read("supabase/migrations/20261009123000_nusa_employee_compensation.sql");
+const payrollAuditSchema = read("supabase/migrations/20261009125000_nusa_payroll_audit.sql");
+const payrollIndexes = read("supabase/migrations/20261009124000_nusa_payroll_fk_indexes.sql");
 const compensationUi = read("components/CompensationWorkspace.tsx");
 const payrollUi = read("components/PayrollWorkspace.tsx");
 assert(blueprint.includes("three-way match") && blueprint.includes("Business continuity") && blueprint.includes("ISO 19650"), "enterprise blueprint lacks cross-functional controls or standards mapping");
@@ -170,6 +172,9 @@ assert(payrollSchema.includes("approved_by <> prepared_by") && payrollSchema.inc
 assert(payrollSchema.includes("nusa_workspace_records(id)"), "payroll line must preserve attendance source evidence");
 assert(compensationSchema.includes("alter table public.nusa_employee_compensation enable row level security") && compensationSchema.includes("Effective compensation periods cannot overlap"), "compensation master needs restricted RLS and non-overlapping effective dates");
 assert(compensationUi.includes("effective_from") && compensationUi.includes("position_allowance") && compensationUi.includes("overtime_rate"), "compensation master fields missing");
+assert(payrollAuditSchema.includes("nusa_capture_payroll_event") && payrollAuditSchema.includes("grant select on public.nusa_payroll_events to authenticated"), "payroll audit trail missing or not read-only to users");
+assert(payrollIndexes.includes("idx_nusa_payroll_lines_attendance_record_id"), "payroll attendance foreign-key index missing");
+assert(payrollUi.includes("Audit evidence payroll"), "payroll audit history view missing");
 assert(payrollUi.includes("nusa_employee_compensation") && payrollUi.includes("chooseEmployee"), "payroll must preload effective-dated compensation");
 assert(read("app/hr/page.tsx").includes("/hr/compensation/"), "HR hub must link compensation master");
 
