@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ArrowLeft, Building2, FolderKanban, Users, Boxes, Plus, RefreshCw, Search, Pencil, Archive, Save, X, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Building2, FolderKanban, Users, Boxes, Plus, RefreshCw, Search, Pencil, Archive, Save, X, ShieldCheck, Sparkles } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { currentUser, myTenants, createTenant } from "../../lib/nusa";
 
@@ -41,7 +41,7 @@ export default function MasterDataPage(){
  const [editingId,setEditingId]=useState("");
  const [query,setQuery]=useState("");
  const [loading,setLoading]=useState(true);
- const [saving,setSaving]=useState(false);
+ const [saving,setSaving]=useState(false);\n const [seedingDemo,setSeedingDemo]=useState(false);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [newOrgName,setNewOrgName]=useState("");
@@ -132,6 +132,101 @@ export default function MasterDataPage(){
     :await supabase.from("nusa_assets").update({archived_at:now,asset_status:"retired",updated_by:userId}).eq("id",row.id).eq("tenant_id",tenantId).select("id").single();
   if(result.error)setError("Arsip gagal: "+result.error.message);else{setNotice("Data berhasil diarsipkan.");if(editingId===row.id)cancelEdit();await refresh();}
  }
+ async function seedDemoData(){
+  if(!userId||seedingDemo||saving)return;
+  if(!window.confirm("Muat 25 data contoh SINTETIS ke organisasi aktif? Jika belum ada organisasi, NUSA akan membuat tenant bernama NUSA Demo Engineering. Data akan diberi kode DEMO dan dapat diarsipkan seperti data biasa."))return;
+  setSeedingDemo(true);setError("");setNotice("");
+  try{
+   let targetTenantId=tenantId;
+   if(!targetTenantId){
+    const code="NUSA-DEMO-"+new Date().toISOString().slice(0,10).replace(/-/g,"")+"-"+String(Date.now()).slice(-4);
+    const created=await createTenant("NUSA Demo Engineering (DATA CONTOH)",code,userId);
+    if(created.error||!created.data?.id)throw new Error("Organisasi demo gagal dibuat: "+(created.error?.message??"ID organisasi tidak diterima."));
+    targetTenantId=created.data.id;
+    setTenantId(targetTenantId);
+   }
+   const projectSeed=[
+    {code:"DEMO-PRJ-01",name:"Gedung Kantor NUSA",category:"building",status:"active",progress:35,budget:12500000000,target_date:"2027-06-30"},
+    {code:"DEMO-PRJ-02",name:"Gudang dan Logistik",category:"industrial",status:"active",progress:20,budget:7800000000,target_date:"2027-09-30"},
+    {code:"DEMO-PRJ-03",name:"Renovasi Fasilitas",category:"renovation",status:"on_hold",progress:10,budget:1850000000,target_date:"2027-03-31"},
+    {code:"DEMO-PRJ-04",name:"Infrastruktur Kawasan",category:"infrastructure",status:"active",progress:48,budget:5600000000,target_date:"2027-12-15"},
+    {code:"DEMO-PRJ-05",name:"Workshop Engineering",category:"engineering",status:"active",progress:65,budget:2350000000,target_date:"2027-04-30"}
+   ];
+   let p=await supabase.from("nusa_projects").select("id,code").eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null);
+   if(p.error)throw new Error("Gagal memeriksa proyek contoh: "+p.error.message);
+   const knownProjectCodes=new Set((p.data??[]).map(x=>x.code));
+   const newProjects=projectSeed.filter(x=>!knownProjectCodes.has(x.code));
+   if(newProjects.length){
+    const inserted=await supabase.from("nusa_projects").insert(newProjects.map(x=>({...x,tenant_id:targetTenantId}))).select("id,code");
+    if(inserted.error)throw new Error("Gagal menambah proyek contoh: "+inserted.error.message);
+   }
+   p=await supabase.from("nusa_projects").select("id,code").eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null);
+   if(p.error)throw new Error("Gagal membaca proyek contoh: "+p.error.message);
+   const projectRows=(p.data??[]) as {id:string;code:string}[];
+   if(projectRows.length<5)throw new Error("Belum tersedia 5 proyek contoh. Periksa izin organisasi lalu jalankan lagi.");
+   const projectByCode=new Map(projectRows.map(x=>[x.code,x.id]));
+   const employeeSeed=[
+    ["DEMO-EMP-01","Andi Pratama","Direktur Operasional"],
+    ["DEMO-EMP-02","Siti Rahmawati","Project Manager"],
+    ["DEMO-EMP-03","Bima Santoso","Site Engineer"],
+    ["DEMO-EMP-04","Dewi Anggraini","Arsitek"],
+    ["DEMO-EMP-05","Rizky Firmansyah","Structural Engineer"],
+    ["DEMO-EMP-06","Nadia Putri","Quantity Surveyor"],
+    ["DEMO-EMP-07","Fajar Hidayat","Procurement Officer"],
+    ["DEMO-EMP-08","Intan Permata","HR & Administration"],
+    ["DEMO-EMP-09","Bagus Wicaksono","HSE Officer"],
+    ["DEMO-EMP-10","Maya Lestari","Document Controller"]
+   ];
+   let e=await supabase.from("nusa_employees").select("id,employee_code").eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null);
+   if(e.error)throw new Error("Gagal memeriksa pegawai contoh: "+e.error.message);
+   const knownEmployeeCodes=new Set((e.data??[]).map(x=>x.employee_code));
+   const newEmployees=employeeSeed.filter(x=>!knownEmployeeCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,employee_code:x[0],full_name:x[1],position_title:x[2],email:x[0].toLowerCase()+"@example.com",employment_status:"active",joined_on:"2026-01-05",project_id:projectByCode.get(projectSeed[i%5].code)??null,notes:"DATA CONTOH SINTETIS — bukan data pegawai nyata.",created_by:userId,updated_by:userId}));
+   if(newEmployees.length){
+    const inserted=await supabase.from("nusa_employees").insert(newEmployees).select("id,employee_code");
+    if(inserted.error)throw new Error("Gagal menambah pegawai contoh: "+inserted.error.message);
+   }
+   e=await supabase.from("nusa_employees").select("id,employee_code").eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null);
+   if(e.error)throw new Error("Gagal membaca pegawai contoh: "+e.error.message);
+   const employeeRows=(e.data??[]) as {id:string;employee_code:string}[];
+   if(employeeRows.length<10)throw new Error("Belum tersedia 10 pegawai contoh. Periksa izin HR organisasi lalu jalankan lagi.");
+   const employeeByCode=new Map(employeeRows.map(x=>[x.employee_code,x.id]));
+   const assetSeed=[
+    ["DEMO-AST-01","Laptop Engineering 01","IT equipment",18500000,"Kantor pusat"],
+    ["DEMO-AST-02","Laptop Engineering 02","IT equipment",18500000,"Kantor pusat"],
+    ["DEMO-AST-03","Workstation CAD","IT equipment",32500000,"Studio desain"],
+    ["DEMO-AST-04","Total Station","Survey equipment",68000000,"Gudang alat"],
+    ["DEMO-AST-05","Drone Survey","Survey equipment",42000000,"Gudang alat"],
+    ["DEMO-AST-06","Generator Portable","Power equipment",27500000,"Workshop"],
+    ["DEMO-AST-07","Concrete Test Hammer","QA equipment",9500000,"Lab mutu"],
+    ["DEMO-AST-08","Pickup Operasional","Vehicle",285000000,"Pool kendaraan"],
+    ["DEMO-AST-09","Printer A3","Office equipment",16500000,"Ruang dokumen"],
+    ["DEMO-AST-10","Safety Kit Set","HSE equipment",7500000,"Gudang HSE"]
+   ];
+   let a=await supabase.from("nusa_assets").select("id,asset_code").eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null);
+   if(a.error)throw new Error("Gagal memeriksa aset contoh: "+a.error.message);
+   const knownAssetCodes=new Set((a.data??[]).map(x=>x.asset_code));
+   const newAssets=assetSeed.filter(x=>!knownAssetCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,asset_code:x[0],name:x[1],category:x[2],condition_status:"good",asset_status:i<3?"assigned":"available",acquisition_date:"2026-01-12",acquisition_cost:x[3],location:x[4],project_id:projectByCode.get(projectSeed[i%5].code)??null,assigned_employee_id:employeeByCode.get(employeeSeed[i%10][0])??null,notes:"DATA CONTOH SINTETIS — nilai dan penempatan hanya untuk uji coba.",created_by:userId,updated_by:userId}));
+   if(newAssets.length){
+    const inserted=await supabase.from("nusa_assets").insert(newAssets).select("id,asset_code");
+    if(inserted.error)throw new Error("Gagal menambah aset contoh: "+inserted.error.message);
+   }
+   const [pCount,eCount,aCount]=await Promise.all([
+    supabase.from("nusa_projects").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("code","DEMO-PRJ-%").is("deleted_at",null),
+    supabase.from("nusa_employees").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null),
+    supabase.from("nusa_assets").select("id",{count:"exact",head:true}).eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null)
+   ]);
+   if(pCount.error||eCount.error||aCount.error)throw new Error("Data contoh dibuat, tetapi verifikasi jumlah belum selesai. Tekan Muat Ulang lalu periksa tab proyek, pegawai, dan aset.");
+   if((pCount.count??0)<5||(eCount.count??0)<10||(aCount.count??0)<10)throw new Error("Sebagian data contoh belum lengkap. Tekan tombol ini lagi untuk melanjutkan tanpa menggandakan kode data.");
+   setTab("projects");
+   setNotice("Data contoh siap: 5 proyek + 10 pegawai + 10 aset = 25 record sintetis. Organisasi dan semua relasi mengikuti tenant yang dipilih; proses dapat dijalankan ulang tanpa menggandakan kode DEMO.");
+   await refresh();
+  }catch(err){
+   setError(err instanceof Error?err.message:"Data contoh gagal dimuat. Periksa koneksi dan izin organisasi.");
+  }finally{
+   setSeedingDemo(false);
+  }
+ }
+
  async function createOrganization(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!userId||!newOrgName.trim())return;
   setSaving(true);setError("");setNotice("");
@@ -151,7 +246,7 @@ export default function MasterDataPage(){
 
  return <main className="nusa gridbg"><div style={{minHeight:"100vh",padding:"24px",maxWidth:1440,margin:"0 auto"}}>
   <Link href="/" style={{display:"inline-flex",gap:8,alignItems:"center",color:"#a9d8b7",textDecoration:"none",fontSize:13}}><ArrowLeft size={16}/> Command Center</Link>
-  <header style={{marginTop:28,display:"flex",justifyContent:"space-between",gap:18,alignItems:"end",flexWrap:"wrap"}}><div><div className="muted" style={{fontSize:11,letterSpacing:".13em"}}>NUSA / DATA GOVERNANCE</div><h1 className="brand" style={{fontSize:40,margin:"8px 0"}}>Master Data</h1><p className="muted" style={{fontSize:14,lineHeight:1.7,maxWidth:760}}>Satu sumber data untuk organisasi, proyek, pegawai, dan aset. Data turunan terhubung ke organisasi aktif dan—bila relevan—ke proyek yang sama.</p></div><button onClick={()=>void refresh()} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #29463a",cursor:"pointer"}}><RefreshCw size={15}/> Muat ulang</button></header>
+  <header style={{marginTop:28,display:"flex",justifyContent:"space-between",gap:18,alignItems:"end",flexWrap:"wrap"}}><div><div className="muted" style={{fontSize:11,letterSpacing:".13em"}}>NUSA / DATA GOVERNANCE</div><h1 className="brand" style={{fontSize:40,margin:"8px 0"}}>Master Data</h1><p className="muted" style={{fontSize:14,lineHeight:1.7,maxWidth:760}}>Satu sumber data untuk organisasi, proyek, pegawai, dan aset. Data turunan terhubung ke organisasi aktif dan—bila relevan—ke proyek yang sama.</p></div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{userId&&<button onClick={()=>void seedDemoData()} disabled={seedingDemo||saving||loading} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #426c54",cursor:seedingDemo?"wait":"pointer",opacity:seedingDemo||saving||loading?0.65:1}}><Sparkles size={15}/>{seedingDemo?"Memuat 25 data…":"Muat 25 data contoh"}</button>}<button onClick={()=>void refresh()} className="glass" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,color:"#dcebe4",border:"1px solid #29463a",cursor:"pointer"}}><RefreshCw size={15}/> Muat ulang</button></div></header>
   {!userId?<section className="glass" style={{marginTop:24,padding:24,borderRadius:16}}><h2>Masuk diperlukan</h2><p className="muted">Masuk melalui Command Center untuk mengelola master data organisasi.</p><Link href="/" style={{color:"#a9d8b7"}}>Kembali ke Command Center →</Link></section>:<>
    <section className="glass" style={{marginTop:18,padding:16,borderRadius:14,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}><div style={{flex:1,minWidth:240}}><div className="muted" style={{fontSize:10,marginBottom:6}}>ORGANISASI AKTIF</div><select aria-label="Organisasi aktif" value={tenantId} onChange={e=>setTenantId(e.target.value)} style={{...fieldStyle,marginTop:0,maxWidth:560}}><option value="">Pilih organisasi</option>{tenants.map(t=><option key={t.id} value={t.id}>{t.name} · {t.code}</option>)}</select></div><div><div className="muted" style={{fontSize:10}}>PROYEK</div><strong style={{fontSize:22}}>{projects.length}</strong></div><div><div className="muted" style={{fontSize:10}}>PEGAWAI AKTIF</div><strong style={{fontSize:22}}>{employees.length}</strong></div><div><div className="muted" style={{fontSize:10}}>ASET AKTIF</div><strong style={{fontSize:22}}>{assets.length}</strong></div></section>
    <nav aria-label="Jenis master data" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10,marginTop:14}}>{tabs.map(t=>{const Icon=t.icon;return <button key={t.id} onClick={()=>setTab(t.id)} aria-pressed={tab===t.id} className="glass" style={{textAlign:"left",padding:15,borderRadius:12,border:tab===t.id?"1px solid #8ed8a6":"1px solid #29463a",background:tab===t.id?"rgba(42,105,72,.22)":"rgba(13,28,23,.78)",color:"#e7f2eb",cursor:"pointer"}}><div style={{display:"flex",gap:9,alignItems:"center"}}><Icon size={18}/><b>{t.label}</b></div><div className="muted" style={{fontSize:11,marginTop:8}}>{t.description}</div></button>})}</nav>
