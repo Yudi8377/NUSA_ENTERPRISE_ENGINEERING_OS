@@ -160,7 +160,7 @@ const payrollAuditSchema = read("supabase/migrations/20261009125000_nusa_payroll
 const payrollIndexes = read("supabase/migrations/20261009124000_nusa_payroll_fk_indexes.sql");
 const compensationUi = read("components/CompensationWorkspace.tsx");
 const payrollUi = read("components/PayrollWorkspace.tsx");
-assert(blueprint.includes("three-way match") && blueprint.includes("Business continuity") && blueprint.includes("ISO 19650"), "enterprise blueprint lacks cross-functional controls or standards mapping");
+assert(blueprint.includes("three-way match") && blueprint.includes("ISO 22301") && blueprint.includes("ISO 19650"), "enterprise blueprint lacks cross-functional controls or standards mapping");
 assert(read("app/system-blueprint/page.tsx").includes("/procurement/"), "enterprise blueprint route missing supply-chain links");
 assert(workspaceUi.includes("const activeRecordType=recordType;") && workspaceUi.includes('recordQuery=recordQuery.eq("record_type",activeRecordType)'), "workspace registers must isolate each submenu by its record type");
 for (const route of ["warehouses","receipts","movements","stock-counts","project-issues"]) assert(read("app/procurement/"+route+"/page.tsx").includes('moduleCode="procurement"'), "warehouse workflow route missing: "+route);
