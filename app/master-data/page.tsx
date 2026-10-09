@@ -35,7 +35,8 @@ export default function MasterDataPage(){
  const [tenantId,setTenantId]=useState("");
  const [projects,setProjects]=useState<Project[]>([]);
  const [employees,setEmployees]=useState<Employee[]>([]);
- const [assets,setAssets]=useState<Asset[]>([]);\n const [events,setEvents]=useState<MasterEvent[]>([]);
+ const [assets,setAssets]=useState<Asset[]>([]);
+ const [events,setEvents]=useState<MasterEvent[]>([]);
  const [values,setValues]=useState<FormValues>({...blank.organization});
  const [editingId,setEditingId]=useState("");
  const [query,setQuery]=useState("");
@@ -59,14 +60,16 @@ export default function MasterDataPage(){
    const active=tenantRows.some(x=>x.id===tenantId)?tenantId:(tenantRows[0]?.id??"");
    setTenantId(active);
    if(!active){setProjects([]);setEmployees([]);setAssets([]);setEvents([]);setLoading(false);return;}
-   const [p,e,a]=await Promise.all([
+   const [p,e,a,ev]=await Promise.all([
     supabase.from("nusa_projects").select("id,tenant_id,code,name,category,status,progress,budget,target_date,deleted_at,updated_at").eq("tenant_id",active).is("deleted_at",null).order("updated_at",{ascending:false}),
     supabase.from("nusa_employees").select("id,tenant_id,project_id,employee_code,full_name,email,phone,position_title,employment_status,joined_on,notes,updated_at").eq("tenant_id",active).is("archived_at",null).order("updated_at",{ascending:false}),
-    supabase.from("nusa_assets").select("id,tenant_id,project_id,assigned_employee_id,asset_code,name,category,condition_status,asset_status,acquisition_date,acquisition_cost,location,notes,updated_at").eq("tenant_id",active).is("archived_at",null).order("updated_at",{ascending:false})
+    supabase.from("nusa_assets").select("id,tenant_id,project_id,assigned_employee_id,asset_code,name,category,condition_status,asset_status,acquisition_date,acquisition_cost,location,notes,updated_at").eq("tenant_id",active).is("archived_at",null).order("updated_at",{ascending:false}),
+    supabase.from("nusa_master_data_events").select("id,entity_table,entity_id,actor_id,action,created_at,after_state").eq("tenant_id",active).order("created_at",{ascending:false}).limit(12)
    ]);
    if(p.error)setError("Gagal memuat proyek: "+p.error.message);else setProjects((p.data??[]) as Project[]);
    if(e.error)setError("Gagal memuat pegawai: "+e.error.message);else setEmployees((e.data??[]) as Employee[]);
    if(a.error)setError("Gagal memuat aset: "+a.error.message);else setAssets((a.data??[]) as Asset[]);
+   if(ev.error)setError("Gagal memuat riwayat: "+ev.error.message);else setEvents((ev.data??[]) as MasterEvent[]);
    setLoading(false);
  },[tenantId]);
  useEffect(()=>{const timer=window.setTimeout(()=>{void refresh();},0);return()=>window.clearTimeout(timer);},[refresh]);
@@ -167,6 +170,7 @@ export default function MasterDataPage(){
      :visibleAssets.length===0?<div className="empty-state">Belum ada aset. Tambahkan aset dan hubungkan dengan proyek atau pegawai.</div>:<div style={{overflowX:"auto",marginTop:14}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:520}}><thead><tr>{["Aset","Kondisi","Penempatan","Aksi"].map(x=><th key={x} style={{textAlign:"left",padding:"10px 8px",borderBottom:"1px solid #29463a",color:"#9eb5a7"}}>{x}</th>)}</tr></thead><tbody>{visibleAssets.map(a=><tr key={a.id}><td style={{padding:"12px 8px",borderBottom:"1px solid #1e3329"}}><b>{a.name}</b><div className="muted" style={{fontSize:10,marginTop:4}}>{a.asset_code} · {a.category}</div><div className="muted" style={{fontSize:10,marginTop:4}}>{a.acquisition_cost==null?"Nilai belum diisi":new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(a.acquisition_cost))}</div></td><td style={{padding:8,borderBottom:"1px solid #1e3329"}}>{a.condition_status}<div className="muted" style={{fontSize:10,marginTop:4}}>{a.asset_status}</div></td><td style={{padding:8,borderBottom:"1px solid #1e3329"}}>{projects.find(p=>p.id===a.project_id)?.name||"—"}<div className="muted" style={{fontSize:10,marginTop:4}}>{employees.find(e=>e.id===a.assigned_employee_id)?.full_name||"Belum ada PIC"}</div></td><td style={{padding:8,borderBottom:"1px solid #1e3329",whiteSpace:"nowrap"}}><button aria-label={"Ubah "+a.name} onClick={()=>edit(a)} className="glass" style={{padding:7,color:"white",borderRadius:7,marginRight:5}}><Pencil size={14}/></button><button aria-label={"Arsipkan "+a.name} onClick={()=>void archive(a)} className="glass" style={{padding:7,color:"#f0c3a5",borderRadius:7}}><Archive size={14}/></button></td></tr>)}</tbody></table></div>}
     </section>
    </div>
+   <section className="glass" style={{marginTop:14,padding:18,borderRadius:14}}><div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center",flexWrap:"wrap"}}><div><div className="muted" style={{fontSize:10,letterSpacing:".12em"}}>AUDIT EVIDENCE</div><h2 style={{fontSize:19,margin:"7px 0 0"}}>Riwayat perubahan master data</h2></div><span className="muted" style={{fontSize:11}}>{events.length} event terbaru</span></div>{events.length===0?<p className="muted" style={{fontSize:12}}>Belum ada perubahan tercatat untuk organisasi ini.</p>:<div style={{overflowX:"auto",marginTop:10}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:500}}><thead><tr>{["Waktu","Jenis data","Aksi","Referensi"].map(x=><th key={x} style={{textAlign:"left",padding:"10px 8px",borderBottom:"1px solid #29463a",color:"#9eb5a7"}}>{x}</th>)}</tr></thead><tbody>{events.map(ev=>{const state=ev.after_state??{};const reference=String(state.name??state.full_name??state.title??state.asset_code??state.code??ev.entity_id);return <tr key={ev.id}><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329",whiteSpace:"nowrap"}}>{new Date(ev.created_at).toLocaleString("id-ID")}</td><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329"}}>{ev.entity_table.replace("nusa_","").replaceAll("_"," ")}</td><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329"}}>{ev.action==="INSERT"?"Dibuat":"Diubah"}</td><td style={{padding:"10px 8px",borderBottom:"1px solid #1e3329"}}>{reference}</td></tr>})}</tbody></table></div>}</section>
    {error&&<p role="alert" style={{marginTop:14,padding:12,border:"1px solid #8b4949",borderRadius:9,color:"#ffc4c4"}}>{error}</p>}{notice&&<p role="status" style={{marginTop:14,padding:12,border:"1px solid #35674b",borderRadius:9,color:"#a9d8b7"}}>{notice}</p>}
    <div className="glass" style={{marginTop:14,padding:14,borderRadius:12,display:"flex",gap:10,alignItems:"start"}}><ShieldCheck size={17}/><div className="muted" style={{fontSize:11,lineHeight:1.7}}>RLS membatasi akses berdasarkan keanggotaan organisasi. Relasi proyek dan pegawai divalidasi agar aset tidak dapat ditautkan ke proyek atau PIC milik tenant lain. Arsip tidak menghapus data permanen; perubahan dicatat pada event trail.</div></div>
   </>}
