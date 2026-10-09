@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="crm" section="contacts" title="Account & Contact Registry" eyebrow="CRM / ACCOUNT REGISTRY" description="Kelola account, peran kontak, detail komunikasi bisnis, dan izin komunikasi. Hindari data pribadi yang tidak relevan." recordType="crm_contact" recordLabel="Kontak"/>}
