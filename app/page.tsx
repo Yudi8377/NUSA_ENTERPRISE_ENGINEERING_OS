@@ -108,10 +108,10 @@ export default function Home() {
 
   return <main className="nusa gridbg">
     <div style={{display:"grid",gridTemplateColumns:open?"272px 1fr":"72px 1fr",minHeight:"100vh"}}>
-      <aside className="glass" style={{padding:18,position:"sticky",top:0,height:"100vh",zIndex:5}}>
+      <aside className={"glass nusa-sidebar "+(open?"is-open":"is-closed")} style={{padding:18,position:"sticky",top:0,height:"100vh",zIndex:5}}>
         <button onClick={()=>setOpen(!open)} aria-label="Navigasi" style={{background:"none",border:0,color:"white",cursor:"pointer"}}>{open?<PanelLeft/>:<Menu/>}</button>
         {open&&<><div style={{margin:"22px 4px 28px"}}><div className="brand" style={{fontSize:23,fontWeight:700}}>NUSA</div><div className="muted" style={{fontSize:12}}>ENTERPRISE ENGINEERING OS</div></div>
-        {modules.map(([name,Icon,href])=><Link key={name} href={href} style={{display:"flex",gap:11,alignItems:"center",padding:"11px 8px",borderRadius:10,color:"#b9c9c1",fontSize:13,textDecoration:"none"}}><Icon size={17}/>{name}</Link>)}
+        {modules.map(([name,Icon,href])=><Link key={name} href={href} onClick={()=>setOpen(false)} style={{display:"flex",gap:11,alignItems:"center",padding:"11px 8px",borderRadius:10,color:"#b9c9c1",fontSize:13,textDecoration:"none"}}><Icon size={17}/>{name}</Link>)}
         <div style={{marginTop:20,padding:12,borderTop:"1px solid #20352d",fontSize:11}} className="muted">PHASE 0 → GO LIVE<br/>Parallel workstreams active</div></>}
       </aside>
 
