@@ -1,2 +1,3 @@
 import EngineeringDisciplineWorkspace from "../../../components/EngineeringDisciplineWorkspace";
-export default function Page(){return <EngineeringDisciplineWorkspace discipline="design-review"/>}
+import GenerativeEngineeringStudio from "../../../components/GenerativeEngineeringStudio";
+export default function Page(){return <><GenerativeEngineeringStudio mode="review"/><EngineeringDisciplineWorkspace discipline="design-review"/></>}
