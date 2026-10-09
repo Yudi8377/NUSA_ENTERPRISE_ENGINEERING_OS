@@ -2,8 +2,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, RefreshCw, Search, ShieldCheck } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { currentUser, myTenants } from "@/lib/nusa";
+import { supabase } from "../lib/supabase";
+import { currentUser, myTenants } from "../lib/nusa";
 
 type Tenant={id:string;name:string;code:string;status:string};
 type RecordRow={id:string;record_type:string;record_code:string|null;title:string;description:string|null;status:string;amount:number|null;currency:string;created_at:string;updated_at:string};
