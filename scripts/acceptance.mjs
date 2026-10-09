@@ -147,4 +147,17 @@ assert(workspaceUi.includes("function startEdit(row:RecordRow)"), "enterprise wo
 assert(workspaceUi.includes("setDetailRow(row)"), "enterprise workspace detail view missing");
 assert(workspaceUi.includes("Cetak / PDF"), "enterprise workspace print action missing");
 assert(workspaceUi.includes("updateStatus(row,\"archived\")"), "enterprise workspace archive action missing");
+
+const generativeStudio = read("components/GenerativeEngineeringStudio.tsx");
+assert(generativeStudio.includes('function makeDxf'), "generative CAD DXF exporter missing");
+assert(generativeStudio.includes('function makeObj'), "generative 3D OBJ exporter missing");
+assert(generativeStudio.includes('function makeSvg'), "generative SVG plan exporter missing");
+assert(generativeStudio.includes('geometry_m2') === false, "no malformed geometry field expected");
+assert(generativeStudio.includes('Unduh DXF CAD'), "DXF download action missing");
+assert(generativeStudio.includes('Unduh model OBJ 3D'), "3D model download action missing");
+assert(generativeStudio.includes('Kajian teknis awal'), "technical study workspace missing");
+assert(read("app/architecture/spatial-data/page.tsx").includes('GenerativeEngineeringStudio mode="spatial"'), "spatial route must render the geometry generator");
+assert(read("app/architecture/cad-drawings/page.tsx").includes('GenerativeEngineeringStudio mode="cad"'), "CAD route must render the CAD generator");
+assert(read("app/architecture/design-review/page.tsx").includes('GenerativeEngineeringStudio mode="review"'), "design review route must render CAD/3D outputs and technical studies");
+
 console.log("NUSA operational acceptance static assertions: PASS");
