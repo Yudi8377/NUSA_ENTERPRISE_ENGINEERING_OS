@@ -24,8 +24,8 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const refresh=useCallback(async()=>{
-   setLoading(true);setError("");
    const user=await currentUser();
+    setLoading(true);setError("");
    if(!user){setUserId("");setRows([]);setTenantList([]);setLoading(false);return;}
    setUserId(user.id);
    const tenantResult=await myTenants();
@@ -39,7 +39,7 @@ export default function EnterpriseWorkspace({moduleCode,title,eyebrow,descriptio
    if(result.error)setError(result.error.message);else setRows((result.data??[]) as RecordRow[]);
    setLoading(false);
  },[moduleCode,tenantId]);
- useEffect(()=>{void refresh();},[refresh]);
+ useEffect(()=>{const timer=window.setTimeout(()=>{void refresh();},0);return()=>window.clearTimeout(timer);},[refresh]);
  const visible=useMemo(()=>rows.filter(row=>[row.title,row.record_type,row.record_code??"",row.status].join(" ").toLowerCase().includes(query.toLowerCase())),[rows,query]);
  async function addRecord(event:React.FormEvent<HTMLFormElement>){
    event.preventDefault();if(!userId||!tenantId||!newTitle.trim())return;
