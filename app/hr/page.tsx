@@ -1,2 +1,2 @@
-import EnterpriseWorkspace from "@/components/EnterpriseWorkspace";
+import EnterpriseWorkspace from "../../components/EnterpriseWorkspace";
 export default function Page(){return <EnterpriseWorkspace moduleCode="hr" title="HRD & Payroll" eyebrow="NUSA / PEOPLE OPERATIONS" description="Catat kebutuhan SDM, pelatihan, kehadiran, dan pekerjaan payroll. Data personal dan hasil payroll final wajib mengikuti kontrol akses dan pemeriksaan yang sesuai." recordType="people_operation" recordLabel="Catatan HR"/>}
