@@ -197,7 +197,7 @@ export default function MasterDataPage(){
    let e=await supabase.from("nusa_employees").select("id,employee_code").eq("tenant_id",targetTenantId).like("employee_code","DEMO-EMP-%").is("archived_at",null);
    if(e.error)throw new Error("Gagal memeriksa pegawai contoh: "+e.error.message);
    const knownEmployeeCodes=new Set((e.data??[]).map(x=>x.employee_code));
-   const newEmployees=employeeSeed.filter(x=>!knownEmployeeCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,employee_code:x[0],full_name:x[1],position_title:x[2],email:x[0].toLowerCase()+"@example.com",employment_status:"active",joined_on:"2026-01-05",project_id:projectByCode.get(projectSeed[i%10].code)??null,notes:"DATA CONTOH SINTETIS — bukan data pegawai nyata.",created_by:userId,updated_by:userId}));
+   const newEmployees=employeeSeed.filter(x=>!knownEmployeeCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,employee_code:x[0],full_name:x[1],position_title:x[2],email:x[0].toLowerCase()+"@example.com",employment_status:"active",joined_on:"2026-01-05",project_id:projectByCode.get(projectSeed[i%projectSeed.length].code)??null,notes:"DATA CONTOH SINTETIS — bukan data pegawai nyata.",created_by:userId,updated_by:userId}));
    if(newEmployees.length){
     const inserted=await supabase.from("nusa_employees").insert(newEmployees).select("id,employee_code");
     if(inserted.error)throw new Error("Gagal menambah pegawai contoh: "+inserted.error.message);
@@ -223,7 +223,7 @@ export default function MasterDataPage(){
    const a=await supabase.from("nusa_assets").select("id,asset_code").eq("tenant_id",targetTenantId).like("asset_code","DEMO-AST-%").is("archived_at",null);
    if(a.error)throw new Error("Gagal memeriksa aset contoh: "+a.error.message);
    const knownAssetCodes=new Set((a.data??[]).map(x=>x.asset_code));
-   const newAssets=assetSeed.filter(x=>!knownAssetCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,asset_code:x[0],name:x[1],category:x[2],condition_status:"good",asset_status:i<3?"assigned":"available",acquisition_date:"2026-01-12",acquisition_cost:x[3],location:x[4],project_id:projectByCode.get(projectSeed[i%10].code)??null,assigned_employee_id:employeeByCode.get(employeeSeed[i%10][0])??null,notes:"DATA CONTOH SINTETIS — nilai dan penempatan hanya untuk uji coba.",created_by:userId,updated_by:userId}));
+   const newAssets=assetSeed.filter(x=>!knownAssetCodes.has(x[0])).map((x,i)=>({tenant_id:targetTenantId,asset_code:x[0],name:x[1],category:x[2],condition_status:"good",asset_status:i<3?"assigned":"available",acquisition_date:"2026-01-12",acquisition_cost:x[3],location:x[4],project_id:projectByCode.get(projectSeed[i%projectSeed.length].code)??null,assigned_employee_id:employeeByCode.get(employeeSeed[i%10][0])??null,notes:"DATA CONTOH SINTETIS — nilai dan penempatan hanya untuk uji coba.",created_by:userId,updated_by:userId}));
    if(newAssets.length){
     const inserted=await supabase.from("nusa_assets").insert(newAssets).select("id,asset_code");
     if(inserted.error)throw new Error("Gagal menambah aset contoh: "+inserted.error.message);
