@@ -1,0 +1,2 @@
+import EnterpriseWorkspace from "../../../components/EnterpriseWorkspace";
+export default function Page(){return <EnterpriseWorkspace moduleCode="procurement" section="vendors" title="Vendor Qualification" eyebrow="PROCUREMENT / SUPPLIER MANAGEMENT" description="Kelola kode vendor, tipe, kelengkapan dokumen, status kualifikasi, dan risiko vendor." recordType="procurement_vendor" recordLabel="Vendor"/>}
